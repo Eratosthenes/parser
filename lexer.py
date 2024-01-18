@@ -13,16 +13,24 @@ def read_tokens(filename):
 
 token_d = read_tokens('tokens.txt')
 
-class Text:
+class Token:
+    def __init__(self, type, value):
+        self.type = type
+        self.value = value
+    
+    def __repr__(self):
+        return f"<{self.type}: '{self.value}'>"
+
+class Lexer:
     def __init__(self, text):
         self.text = text
         self.i = 0
-        self.peek_idx = -1 
+        self.j = -1 # peek index
         self.buf = []
     
     def _flush(self):
         self.buf = []
-        self.peek_idx = self.i-1
+        self.j = self.i-1
     
     def _is_match(self):
         for pattern in token_d.keys():
@@ -31,10 +39,10 @@ class Text:
         return pattern, False
 
     def _peek(self):
-        self.peek_idx += 1
-        if self.peek_idx >= len(self.text):
+        self.j += 1
+        if self.j == len(self.text):
             return False
-        self.buf.append(self.text[self.peek_idx])
+        self.buf.append(self.text[self.j])
         return True
 
     def next(self):
@@ -43,7 +51,7 @@ class Text:
 
         prev_pattern, found = self._is_match()
         if not found:
-            raise Exception(f"exception encountered on: \"{self.text[self.peek_idx]}\"")
+            raise Exception(f"{self.text[self.i:].split()[0]}")
 
         while True:
             pattern, found = self._is_match()
@@ -54,24 +62,25 @@ class Text:
                 if not self._peek():
                     break
         
-        token = token_d[prev_pattern]
-        self.i += self.peek_idx - self.i
+        token_type = token_d[prev_pattern]
+        token_value = self.text[self.i:self.j]
+        self.i += self.j - self.i
         self._flush()
-        return token
+        return Token(token_type, token_value)
 
 def lex(line):
     tokens = []
-    text = Text(line)
+    text = Lexer(line)
     while True:
         try:
             token = text.next()
-        except:
-            tokens.append(f"parse error: \"{line}\"")
+            if not token:
+                break
+            if token != "SPACE":
+                tokens.append(token)
+        except Exception as e:
+            tokens.append(Token("ERROR", str(e)))
             break
-        if not token:
-            break
-        if not token == "SPACE":
-            tokens.append(token)
 
     return tokens
 
