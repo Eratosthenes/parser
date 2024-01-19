@@ -2,25 +2,28 @@ import sys
 import re
 
 def read_tokens(filename):
-    tokens = {}
+    variable_tokens = {}
+    fixed_tokens = {}
     with open(filename) as f:
         for line in f:
             token_name, _, token_regex = line.strip("\n").partition(" ")
+            ch = token_regex[0]
+
             # process fixed tokens
-            if token_regex[0] == "'":
-                tok_rx = token_regex.removeprefix("'").removesuffix("'")
+            if ch == "'":
+                tok_rx = token_regex.removeprefix(ch).removesuffix(ch)
                 pattern = re.compile(r'^%s$' % re.escape(tok_rx))
-                tokens[tok_rx] = {}
-                tokens[tok_rx][pattern] = token_name
+                fixed_tokens[tok_rx] = {}
+                fixed_tokens[tok_rx] = token_name, pattern
             # process variable length tokens
-            elif token_regex[0] == "\"":
-                tok_rx = token_regex.removeprefix('"').removesuffix('"')
+            elif ch == "\"":
+                tok_rx = token_regex.removeprefix(ch).removesuffix(ch)
                 pattern = re.compile(r'^%s$' % tok_rx)
-                tokens[pattern] = token_name
+                variable_tokens[pattern] = token_name
             else:
                 raise Exception("cannot scan line")
 
-    return tokens
+    return fixed_tokens, variable_tokens
 
 class Token:
     def __init__(self, type, value):
@@ -37,23 +40,20 @@ class Lexer:
         self.j = -1 # peek index
         self.buf = []
 
-        # pre-compute regular expression patterns
-        self.rx_patterns = []
-        for pattern in token_d.keys():
-            if type(pattern) != str:
-                self.rx_patterns.append(pattern)
-    
     def _flush(self):
         self.buf = []
         self.j = self.i-1
     
     def _is_match(self):
         test_str = ''.join(self.buf)
-        if token_d.get(test_str) != None:
-            pattern, _ = list(token_d[test_str].items())[0]
+
+        # try fixed_tokens
+        if fixed_tokens.get(test_str) != None:
+            _, pattern = fixed_tokens[test_str]
             return pattern, True
 
-        for pattern in self.rx_patterns:
+        # try variable_tokens
+        for pattern in variable_tokens.keys():
             pmatch = pattern.match(test_str)
             if pmatch and pmatch.end() == pmatch.endpos:
                 return pattern, True
@@ -85,10 +85,11 @@ class Lexer:
                     break
         
         token_value = self.text[self.i:self.j]
-        if token_d.get(token_value) != None:
-            token_type = token_d[token_value][prev_pattern]
+        if fixed_tokens.get(token_value) != None:
+            token_type, _ = fixed_tokens[token_value]
         else:
-            token_type = token_d[prev_pattern]
+            token_type = variable_tokens[prev_pattern]
+
         self.i += self.j - self.i
         self._flush()
         return Token(token_type, token_value)
@@ -115,6 +116,12 @@ def repl():
         line = input(">")
         if line.lower() == 'q':
             break
+        if line.lower() == 'help':
+            print("Fixed tokens:")
+            print(fixed_tokens)
+            print("\nVariable tokens:")
+            print(variable_tokens)
+            continue
 
         for token in lex(line):
             print(token)
@@ -130,6 +137,7 @@ test_cases = [
     -2
     / 3.14159
 """, # handle new lines
+    "hello \"cruel\" world++",
 ]
 
 def main():
@@ -140,5 +148,5 @@ def main():
         repl()
 
 if __name__=='__main__':
-    token_d = read_tokens('tokens.txt')
+    fixed_tokens, variable_tokens = read_tokens('tokens.txt')
     main()
