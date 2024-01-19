@@ -9,10 +9,8 @@ def read_tokens(filename):
             # process fixed tokens
             if token_regex[0] == "'":
                 tok_rx = token_regex.strip("'")
-                if tokens.get(len(tok_rx)) == None:
-                    tokens[tok_rx] = {}
-
                 pattern = re.compile(r'^%s$' % re.escape(tok_rx))
+                tokens[tok_rx] = {}
                 tokens[tok_rx][pattern] = token_name
             # process variable length tokens
             elif token_regex[0] == "\"":
