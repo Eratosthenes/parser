@@ -1,3 +1,4 @@
+import sys
 import re
 
 def read_tokens(filename):
@@ -110,6 +111,16 @@ def lex(line):
 
     return tokens
 
+def repl():
+    print("Enter an expression ('q' to quit):")
+    while True:
+        line = input(">")
+        if line.lower() == 'q':
+            break
+
+        for token in lex(line):
+            print(token)
+
 test_cases = [
     "4.1*5",
     "1* 5",
@@ -120,5 +131,8 @@ test_cases = [
 ]
 
 if __name__=='__main__':
-    for case in test_cases:
-        print(lex(case))
+    if len(sys.argv) > 1 and "test" in sys.argv[1]:
+        for case in test_cases:
+            print(lex(case))
+    else:
+        repl()
