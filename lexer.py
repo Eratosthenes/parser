@@ -24,8 +24,6 @@ def read_tokens(filename):
 
     return tokens
 
-token_d = read_tokens('tokens.txt')
-
 class Token:
     def __init__(self, type, value):
         self.type = type
@@ -131,6 +129,8 @@ test_cases = [
 ]
 
 if __name__=='__main__':
+    token_d = read_tokens('tokens.txt')
+
     if len(sys.argv) > 1 and "test" in sys.argv[1]:
         for case in test_cases:
             print(lex(case))
