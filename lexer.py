@@ -38,6 +38,12 @@ class Lexer:
         self.i = 0
         self.j = -1 # peek index
         self.buf = []
+
+        # pre-compute regular expression patterns
+        self.rx_patterns = []
+        for pattern in token_d.keys():
+            if type(pattern) != str:
+                self.rx_patterns.append(pattern)
     
     def _flush(self):
         self.buf = []
@@ -49,12 +55,7 @@ class Lexer:
             pattern, _ = list(token_d[test_str].items())[0]
             return pattern, True
 
-        rx_patterns = []
-        for pattern in token_d.keys():
-            if type(pattern) != str:
-                rx_patterns.append(pattern)
-
-        for pattern in rx_patterns:
+        for pattern in self.rx_patterns:
             if pattern.match(test_str):
                 return pattern, True
 
