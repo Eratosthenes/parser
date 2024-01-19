@@ -28,7 +28,7 @@ class Token:
         self.value = value
     
     def __repr__(self):
-        return f"<{self.type}: '{self.value}'>"
+        return f"<{self.type}: {repr(self.value)}>"
 
 class Lexer:
     def __init__(self, text):
@@ -54,7 +54,8 @@ class Lexer:
             return pattern, True
 
         for pattern in self.rx_patterns:
-            if pattern.match(test_str):
+            pmatch = pattern.match(test_str)
+            if pmatch and pmatch.end() == pmatch.endpos:
                 return pattern, True
 
         return None, False
@@ -72,7 +73,7 @@ class Lexer:
 
         prev_pattern, found = self._is_match()
         if not found:
-            raise Exception(f"{self.text[self.i:].split()[0]}")
+            raise Exception(self.text[self.i:].partition(" ")[0])
 
         while True:
             pattern, found = self._is_match()
@@ -100,7 +101,7 @@ def lex(line):
             token = text.next()
             if not token:
                 break
-            if token.type != "SPACE":
+            if token.type not in {"SPACE", "NEWLINE"}:
                 tokens.append(token)
         except Exception as e:
             tokens.append(Token("ERROR", str(e)))
@@ -125,13 +126,19 @@ test_cases = [
     "1.+0.02-3.4 / 4.567*5",
     ".3",
     "1+.3",
+    """1
+    -2
+    / 3.14159
+""", # handle new lines
 ]
 
-if __name__=='__main__':
-    token_d = read_tokens('tokens.txt')
-
+def main():
     if len(sys.argv) > 1 and "test" in sys.argv[1]:
         for case in test_cases:
             print(lex(case))
     else:
         repl()
+
+if __name__=='__main__':
+    token_d = read_tokens('tokens.txt')
+    main()
