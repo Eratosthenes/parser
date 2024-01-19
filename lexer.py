@@ -8,13 +8,13 @@ def read_tokens(filename):
             token_name, _, token_regex = line.strip("\n").partition(" ")
             # process fixed tokens
             if token_regex[0] == "'":
-                tok_rx = token_regex.strip("'")
+                tok_rx = token_regex.removeprefix("'").removesuffix("'")
                 pattern = re.compile(r'^%s$' % re.escape(tok_rx))
                 tokens[tok_rx] = {}
                 tokens[tok_rx][pattern] = token_name
             # process variable length tokens
             elif token_regex[0] == "\"":
-                tok_rx = token_regex.strip("\"")
+                tok_rx = token_regex.removeprefix('"').removesuffix('"')
                 pattern = re.compile(r'^%s$' % tok_rx)
                 tokens[pattern] = token_name
             else:
