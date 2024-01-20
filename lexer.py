@@ -118,9 +118,11 @@ def repl():
             break
         if line.lower() == 'help':
             print("Fixed tokens:")
-            print(fixed_tokens)
+            for key, value in fixed_tokens.items():
+                print(f"'{key}': {value}")
             print("\nVariable tokens:")
-            print(variable_tokens)
+            for key, value in variable_tokens.items():
+                print(f"{key}: {value}")
             continue
 
         for token in lex(line):
