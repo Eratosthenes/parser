@@ -1,6 +1,7 @@
 import re
 import sys
 from lexer.lexer import TokenTable, Lexer
+from parser.parser import parse
 
 def read_tokens(filename):
     """ returns: TokenTable """
@@ -93,8 +94,11 @@ def main():
         _, _, filename = sys.argv[1].partition("=")
         lexer = Lexer(read_tokens('bnf.tok'))
         text = open(filename).read()
-        for token in lexer.set(text).lex():
+        tokens = lexer.set(text).lex()
+        for token in tokens:
             print(token)
+        
+        parse(tokens)
 
 if __name__=='__main__':
     main()
