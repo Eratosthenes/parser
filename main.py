@@ -86,6 +86,7 @@ def main():
     # main.py
     if len(sys.argv) == 1: 
         repl(Lexer(read_tokfile('language.tok')))
+        sys.exit(0)
     else:
         args = ' '.join(sys.argv[1:])
 

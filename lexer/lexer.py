@@ -22,11 +22,12 @@ class Lexer:
     def __str__(self):
         s = "Fixed tokens:\n"
         for key, value in self.fixed_tokens.items():
-            s += f"{key}: '{value}'\n"
+            val_type, _ = value
+            s += f"'{key}': {val_type}\n"
 
         s += "\nVariable tokens:\n"
         for key, value in self.variable_tokens.items():
-            s += f"{key}: '{value}'\n"
+            s += f"\"{key.pattern}\": {value}\n"
         
         return s
 
