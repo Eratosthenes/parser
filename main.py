@@ -84,7 +84,7 @@ def main():
 
     # lexer.py test
     elif "test" in sys.argv[1]: 
-        lexer = Lexer(read_tokens('bnf.tok'))
+        lexer = Lexer(read_tokens('language.tok'))
         for case in test_cases:
             print(lexer.set(case).lex())
 
