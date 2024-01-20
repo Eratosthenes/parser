@@ -11,6 +11,6 @@ ERROR ""[^"]*"
 PIPE '|'
 COLON ':'
 SEMICOLON ';'
-BNF_NAME "[a-z]+"
-TERMINAL "[A-Z]+" # can't be broken down
+BNF_NAME "[a-z_]+"
+TERMINAL "[A-Z_]+" # can't be broken down
 COMMENT "(//.*)|/"

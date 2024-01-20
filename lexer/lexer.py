@@ -19,6 +19,17 @@ class Lexer:
         self.fixed_tokens = token_table.fixed_tokens
         self.variable_tokens = token_table.variable_tokens
 
+    def __str__(self):
+        s = "Fixed tokens:\n"
+        for key, value in self.fixed_tokens.items():
+            s += f"{key}: '{value}'\n"
+
+        s += "\nVariable tokens:\n"
+        for key, value in self.variable_tokens.items():
+            s += f"{key}: '{value}'\n"
+        
+        return s
+
     def _flush(self):
         self.buf = []
         self.j = self.i-1

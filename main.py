@@ -3,7 +3,7 @@ import sys
 from lexer.lexer import TokenTable, Lexer
 from parser.parser import parse
 
-def read_tokens(filename):
+def read_tokfile(filename):
     """ returns: TokenTable """
     variable_tokens = {}
     fixed_tokens = {}
@@ -53,12 +53,7 @@ def repl(lexer):
         if line.lower() == 'q':
             break
         if line.lower() == 'help':
-            print("Fixed tokens:")
-            for key, value in lexer.fixed_tokens.items():
-                print(f"'{key}': {value}")
-            print("\nVariable tokens:")
-            for key, value in lexer.variable_tokens.items():
-                print(f"{key}: {value}")
+            print(lexer)
             continue
 
         for token in lexer.set(line).lex():
@@ -78,27 +73,48 @@ test_cases = [
     "hello \"cruel\" wOrld++",
 ]
 
-def main():
-    # lexer.py
-    if len(sys.argv) == 1: 
-        repl(Lexer(read_tokens('language.tok')))
+def make_dict(arg_str):
+    """ return dictionary of command-line arguments """
+    arg_d = {}
+    for kv in arg_str.split(' '):
+        key, val = kv.split('=')
+        arg_d[key[1:]] = val
 
-    # lexer.py test
-    elif "test" in sys.argv[1]: 
-        lexer = Lexer(read_tokens('language.tok'))
+    return arg_d
+
+def main():
+    # main.py
+    if len(sys.argv) == 1: 
+        repl(Lexer(read_tokfile('language.tok')))
+    else:
+        args = ' '.join(sys.argv[1:])
+
+    # main.py test
+    if "test" in args: 
+        lexer = Lexer(read_tokfile('language.tok'))
         for case in test_cases:
             print(lexer.set(case).lex())
 
-    # lexer.py input=grammar.bnf
-    elif "input" in sys.argv[1]:
-        _, _, filename = sys.argv[1].partition("=")
-        lexer = Lexer(read_tokens('bnf.tok'))
-        text = open(filename).read()
+    # main.py -tokens=bnf.tok -input=grammar.bnf
+    elif "input" in args:
+        arg_d = make_dict(args)
+        lexer = Lexer(read_tokfile(arg_d["tokens"]))
+        text = open(arg_d["input"]).read()
         tokens = lexer.set(text).lex()
         for token in tokens:
             print(token)
         
-        parse(tokens)
+    # main.py -tokens=language.tok -lang=grammar.bnf
+    elif "lang" in args:
+        arg_d = make_dict(args)
+
+        lang_lexer = Lexer(read_tokfile(arg_d["tokens"]))
+        bnf_lexer = Lexer(read_tokfile('bnf.tok'))
+
+        grammar_bnf = open(arg_d["lang"]).read()
+        grammar_tokens = bnf_lexer.set(grammar_bnf).lex() 
+
+        parse(lang_lexer, grammar_tokens)
 
 if __name__=='__main__':
     main()
