@@ -1,6 +1,6 @@
 // bnf grammar for language
-statement: VAR_NAME ASSIGNMENT expr // eg, total:=3+4
-    | FUNC_NAME ASSIGNMENT expr // eg, Total:=3+4 or _t:=3+4
+statement: VAR_NAME ASSIGNMENT expr
+    | FUNC_NAME ASSIGNMENT expr
     ; 
 
 // expression

@@ -30,6 +30,19 @@ class Rule:
     
     def add(self, element):
         self.elements.append(element)
+    
+    def reduce(self):
+        rule = Rule(self.lhs, [])
+        new_elements = []
+        for element in self.elements:
+            if type(element) == str:
+                rule.add(element)
+            else:
+                new_elements.append(element)
+        
+        new_elements.append(rule)
+        self.elements = new_elements
+
 
 class StateMachine:
     def __init__(self, state="SET_LHS"):
@@ -50,11 +63,17 @@ class StateMachine:
         elif token.type == "COLON":
             self.state = "ADD_ELEMENT"
             return
+        
+        elif token.type == "TERMINAL":
+            self.state = "ADD_ELEMENT"
+            self.rule.add(token.value)
 
         elif token.type == "PIPE":
+            self.rule.reduce()
             self.state = "ADD_ELEMENT"
             return
 
         elif token.type == "SEMICOLON":
+            self.rule.reduce()
             self.state = "SET_LHS"
             return self.rule
