@@ -6,11 +6,17 @@ NEWLINE "\n"
 TAB "\t"
 STRING "".*""
 ERROR ""[^"]*"
+VAR_NAME "[a-z]+\w*"
+FUNC_NAME "_?[a-zA-Z]+\w*"
+
+# data types
+BLANK '_'
+INT "\d+|(-\d+)"
+FLOAT "\d+\.\d*|(-\d+\.\d*)"
 
 # operators
 ADD '+'
 SUBTRACT '-'
 MULTIPLY '*'
 DIVIDE '/'
-NUMBER "\d+\.?\d*"
 ASSIGNMENT ':='
