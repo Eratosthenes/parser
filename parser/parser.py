@@ -53,7 +53,7 @@ class StateMachine:
         if token.type == "BNF_NAME":
 
             if self.state == "SET_LHS":
-                self.rule = Rule(token.value)
+                self.rule = Rule(token.value, [])
                 return
 
             elif self.state == "ADD_ELEMENT":
