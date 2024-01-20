@@ -1,10 +1,4 @@
-# tokens for bnf grammar
-
-# bnf tokens
-PIPE '|'
-COLON ':'
-SEMICOLON ';'
-NAME "_?[a-zA-Z]+\d*"
+# tokens for a bnf grammar
 
 # string handling
 SPACE ' '
@@ -13,10 +7,10 @@ TAB "\t"
 STRING "".*""
 ERROR ""[^"]*"
 
-# arithmetic tokens
-ADD '+'
-SUBTRACT '-'
-MULTIPLY '*'
-DIVIDE '/'
-NUMBER "\d+\.?\d*"
-ASSIGNMENT ':='
+# bnf tokens
+PIPE '|'
+COLON ':'
+SEMICOLON ';'
+BNF_NAME "[a-z]+"
+TERMINAL "[A-Z]+" # can't be broken down
+COMMENT "(//.*)|/"

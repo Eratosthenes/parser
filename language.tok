@@ -1,0 +1,16 @@
+# tokens for a programming language
+
+# string handling
+SPACE ' '
+NEWLINE "\n"
+TAB "\t"
+STRING "".*""
+ERROR ""[^"]*"
+
+# operators
+ADD '+'
+SUBTRACT '-'
+MULTIPLY '*'
+DIVIDE '/'
+NUMBER "\d+\.?\d*"
+ASSIGNMENT ':='

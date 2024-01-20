@@ -20,6 +20,15 @@
             "args": ["test"],
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Python: Test Grammar",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "args": ["input=grammar.bnf"],
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }

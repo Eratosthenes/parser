@@ -1,7 +1,10 @@
-statement: NAME ASSIGNMENT expr; # eg., total := 3 + 4
+// bnf grammar
+statement: NAME ASSIGNMENT expr; // eg., total := 3 + 4
 
+// expression
 expr: expr op expr | NUMBER;
 
+// operations
 op: ADD 
     | SUBTRACT
     | MULTIPLY

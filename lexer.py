@@ -12,7 +12,7 @@ def read_tokens(filename):
 
             token_name, _, token_regex = line.strip("\n").partition(" ")
             if "#" in token_regex:
-                token_regex = token_regex[token_regex.index("#")]
+                token_regex = token_regex[:token_regex.index("#")].strip(" ")
 
             ch = token_regex[0]
             tok_rx = token_regex.removeprefix(ch).removesuffix(ch)
@@ -29,7 +29,7 @@ def read_tokens(filename):
                 pattern = re.compile(r'^%s$' % tok_rx)
                 variable_tokens[pattern] = token_name
             else:
-                raise Exception("cannot scan line")
+                raise Exception(f"cannot parse: '{line}'")
 
     return TokenTable(fixed_tokens, variable_tokens)
 
@@ -185,7 +185,7 @@ def main():
         for case in test_cases:
             print(lexer.set(case).lex())
 
-    # lexer.py input=x.tok
+    # lexer.py input=grammar.bnf
     elif "input" in sys.argv[1]:
         _, _, filename = sys.argv[1].partition("=")
         lexer = Lexer(read_tokens('bnf.tok'))
