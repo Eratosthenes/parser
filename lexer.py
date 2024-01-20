@@ -6,7 +6,13 @@ def read_tokens(filename):
     fixed_tokens = {}
     with open(filename) as f:
         for line in f:
+            if line[0] in {"#", "\n"}:
+                continue
+
             token_name, _, token_regex = line.strip("\n").partition(" ")
+            if "#" in token_regex:
+                token_regex = token_regex[token_regex.index("#")]
+
             ch = token_regex[0]
             tok_rx = token_regex.removeprefix(ch).removesuffix(ch)
 
@@ -162,5 +168,5 @@ def main():
         repl()
 
 if __name__=='__main__':
-    fixed_tokens, variable_tokens = read_tokens('tokens.txt')
+    fixed_tokens, variable_tokens = read_tokens('bnf.tok')
     main()

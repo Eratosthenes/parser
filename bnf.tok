@@ -1,0 +1,22 @@
+# tokens for bnf grammar
+
+# bnf tokens
+PIPE '|'
+COLON ':'
+SEMICOLON ';'
+NAME "_?[a-zA_Z]+\d*"
+
+# string handling
+SPACE ' '
+NEWLINE "\n"
+TAB "\t"
+STRING "".*""
+ERROR ""[^"]*"
+
+# arithmetic tokens
+ADD '+'
+SUBTRACT '-'
+MULTIPLY '*'
+DIVIDE '/'
+NUMBER "\d+\.?\d*"
+ASSIGNMENT ':='
