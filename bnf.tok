@@ -4,7 +4,7 @@
 PIPE '|'
 COLON ':'
 SEMICOLON ';'
-NAME "_?[a-zA_Z]+\d*"
+NAME "_?[a-zA-Z]+\d*"
 
 # string handling
 SPACE ' '

@@ -1,0 +1,9 @@
+statement: NAME ASSIGNMENT expr; # eg., total := 3 + 4
+
+expr: expr op expr | NUMBER;
+
+op: ADD 
+    | SUBTRACT
+    | MULTIPLY
+    | DIVIDE
+    ;

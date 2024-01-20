@@ -2,6 +2,7 @@ import sys
 import re
 
 def read_tokens(filename):
+    """ returns: TokenTable """
     variable_tokens = {}
     fixed_tokens = {}
     with open(filename) as f:
@@ -30,7 +31,7 @@ def read_tokens(filename):
             else:
                 raise Exception("cannot scan line")
 
-    return fixed_tokens, variable_tokens
+    return TokenTable(fixed_tokens, variable_tokens)
 
 def make_partial_tokens(tok_rx, fixed_tokens):
     for i in range(0, len(tok_rx)):
@@ -51,12 +52,18 @@ class Token:
     def __repr__(self):
         return f"<{self.type}: {repr(self.value)}>"
 
+class TokenTable:
+    def __init__(self, fixed_tokens, variable_tokens):
+        self.fixed_tokens = fixed_tokens
+        self.variable_tokens = variable_tokens
+
 class Lexer:
-    def __init__(self, text):
-        self.text = text
+    def __init__(self, token_table):
         self.i = 0
         self.j = -1 # peek index
         self.buf = []
+        self.fixed_tokens = token_table.fixed_tokens
+        self.variable_tokens = token_table.variable_tokens
 
     def _flush(self):
         self.buf = []
@@ -66,12 +73,12 @@ class Lexer:
         test_str = ''.join(self.buf)
 
         # try fixed_tokens
-        if fixed_tokens.get(test_str) != None:
-            _, pattern = fixed_tokens[test_str]
+        if self.fixed_tokens.get(test_str) != None:
+            _, pattern = self.fixed_tokens[test_str]
             return pattern, True
 
         # try variable_tokens
-        for pattern in variable_tokens.keys():
+        for pattern in self.variable_tokens.keys():
             pmatch = pattern.match(test_str)
             if pmatch and pmatch.end() == pmatch.endpos:
                 return pattern, True
@@ -84,6 +91,13 @@ class Lexer:
             return False
         self.buf.append(self.text[self.j])
         return True
+    
+    def set(self, text):
+        """ set text to tokenize and reset internal state """
+        self.text = text
+        self.i = 0
+        self._flush()
+        return self
 
     def next(self):
         if not self._peek():
@@ -103,32 +117,32 @@ class Lexer:
                     break
         
         token_value = self.text[self.i:self.j]
-        if fixed_tokens.get(token_value) != None:
-            token_type, _ = fixed_tokens[token_value]
+        if self.fixed_tokens.get(token_value) != None:
+            token_type, _ = self.fixed_tokens[token_value]
         else:
-            token_type = variable_tokens[prev_pattern]
+            token_type = self.variable_tokens[prev_pattern]
 
         self.i += self.j - self.i
         self._flush()
         return Token(token_type, token_value)
 
-def lex(line):
-    tokens = []
-    text = Lexer(line)
-    while True:
-        try:
-            token = text.next()
-            if not token:
+    def lex(self):
+        """ return tokens """
+        tokens = []
+        while True:
+            try:
+                token = self.next()
+                if not token:
+                    break
+                if token.type not in {"SPACE", "NEWLINE"}:
+                    tokens.append(token)
+            except Exception as e:
+                tokens.append(Token("ERROR", str(e)))
                 break
-            if token.type not in {"SPACE", "NEWLINE"}:
-                tokens.append(token)
-        except Exception as e:
-            tokens.append(Token("ERROR", str(e)))
-            break
 
-    return tokens
+        return tokens
 
-def repl():
+def repl(lexer):
     print("Enter an expression ('q' to quit):")
     while True:
         line = input(">")
@@ -136,14 +150,14 @@ def repl():
             break
         if line.lower() == 'help':
             print("Fixed tokens:")
-            for key, value in fixed_tokens.items():
+            for key, value in lexer.fixed_tokens.items():
                 print(f"'{key}': {value}")
             print("\nVariable tokens:")
-            for key, value in variable_tokens.items():
+            for key, value in lexer.variable_tokens.items():
                 print(f"{key}: {value}")
             continue
 
-        for token in lex(line):
+        for token in lexer.set(line).lex():
             print(token)
 
 test_cases = [
@@ -157,16 +171,27 @@ test_cases = [
     -2
     / 3.14159
 """, # handle new lines
-    "hello \"cruel\" world++",
+    "hello \"cruel\" wOrld++",
 ]
 
 def main():
-    if len(sys.argv) > 1 and "test" in sys.argv[1]:
+    # lexer.py
+    if len(sys.argv) == 1: 
+        repl(Lexer(read_tokens('bnf.tok')))
+
+    # lexer.py test
+    elif "test" in sys.argv[1]: 
+        lexer = Lexer(read_tokens('bnf.tok'))
         for case in test_cases:
-            print(lex(case))
-    else:
-        repl()
+            print(lexer.set(case).lex())
+
+    # lexer.py input=x.tok
+    elif "input" in sys.argv[1]:
+        _, _, filename = sys.argv[1].partition("=")
+        lexer = Lexer(read_tokens('bnf.tok'))
+        text = open(filename).read()
+        for token in lexer.set(text).lex():
+            print(token)
 
 if __name__=='__main__':
-    fixed_tokens, variable_tokens = read_tokens('bnf.tok')
     main()
