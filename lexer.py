@@ -12,6 +12,9 @@ def read_tokens(filename):
 
             # process fixed tokens
             if ch == "'":
+                if len(tok_rx) > 1:
+                    make_partial_tokens(tok_rx, fixed_tokens)
+
                 pattern = re.compile(r'^%s$' % re.escape(tok_rx))
                 fixed_tokens[tok_rx] = token_name, pattern
             # process variable length tokens
@@ -22,6 +25,17 @@ def read_tokens(filename):
                 raise Exception("cannot scan line")
 
     return fixed_tokens, variable_tokens
+
+def make_partial_tokens(tok_rx, fixed_tokens):
+    for i in range(0, len(tok_rx)):
+        partial_tok_rx = tok_rx[0:i+1]
+        
+        # don't overwrite other tokens here
+        if fixed_tokens.get(partial_tok_rx) != None:
+            continue
+
+        pattern = re.compile(r'^%s$' % re.escape(partial_tok_rx))
+        fixed_tokens[partial_tok_rx] = "ERROR", pattern
 
 class Token:
     def __init__(self, type, value):
