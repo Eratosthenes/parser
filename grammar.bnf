@@ -4,7 +4,7 @@ statement: VAR_NAME ASSIGNMENT expr
     ; 
 
 // expression
-expr: expr op expr | FLOAT | INT;
+expr: expr op expr | op expr | FLOAT | INT;
 
 // operations
 op: ADD 

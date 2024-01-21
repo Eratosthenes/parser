@@ -78,7 +78,9 @@ def make_dict(arg_str):
     arg_d = {}
     for kv in arg_str.split(' '):
         key, val = kv.split('=')
-        arg_d[key[1:]] = val
+        while key[0] == "-":
+            key = key.removeprefix("-")
+        arg_d[key] = val
 
     return arg_d
 

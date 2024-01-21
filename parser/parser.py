@@ -48,8 +48,18 @@ class StateMachine:
     ADD_ELEMENT = "ADD_ELEMENT"
 
     def __init__(self, state=SET_LHS):
-        self.state = state
+        self.state = state # TODO: change to SET_LHS
 
+    """
+    re-write as follows:
+    def next(self, token: Token):
+        self.state, rule = self.handlers[self.state](token)
+        return rule
+
+    and have a function for registering handlers:
+    def register(self, state, handler):
+        self.handlers[state] = handler
+    """
     def next(self, token: Token):
         if token.type == "BNF_NAME":
 
