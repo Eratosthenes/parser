@@ -1,7 +1,8 @@
 import re
 import sys
 from lexer.lexer import TokenTable, Lexer
-from parser.parser import parse
+from parser.parser import parse_bnf
+from repl.repl import repl
 
 def read_tokfile(filename):
     """ returns: TokenTable """
@@ -45,19 +46,6 @@ def make_partial_tokens(tok_rx, fixed_tokens):
 
         pattern = re.compile(r'^%s$' % re.escape(partial_tok_rx))
         fixed_tokens[partial_tok_rx] = "ERROR", pattern
-
-def repl(lexer):
-    print("Enter an expression ('q' to quit):")
-    while True:
-        line = input(">")
-        if line.lower() == 'q':
-            break
-        if line.lower() == 'help':
-            print(lexer)
-            continue
-
-        for token in lexer.set(line).lex():
-            print(token)
 
 test_cases = [
     "4.1*5",
@@ -117,7 +105,7 @@ def main():
         grammar_bnf = open(arg_d["lang"]).read()
         grammar_tokens = bnf_lexer.set(grammar_bnf).lex() 
 
-        parse(lang_lexer, grammar_tokens)
+        parse_bnf(lang_lexer, grammar_tokens)
 
 if __name__=='__main__':
     main()

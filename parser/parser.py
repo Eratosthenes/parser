@@ -1,7 +1,8 @@
 from typing import List
 from lexer.lexer import Lexer, Token
+from repl.repl import repl_bnf
 
-def parse(lexer: Lexer, tokens: List[Token]):
+def parse_bnf(lexer: Lexer, tokens: List[Token]):
     """ inputs: language lexer, tokenized .bnf file """
     print(lexer)
 
@@ -18,6 +19,11 @@ def parse(lexer: Lexer, tokens: List[Token]):
     for rule in rules:
         print(rule)
 
+    print("Enter an expression ('q' to quit):")
+    while True:
+        tokens = repl_bnf(lexer, rules)
+        print(tokens)
+    
 class Rule:
     def __init__(self, lhs):
         self.lhs = lhs
