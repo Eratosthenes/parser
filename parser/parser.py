@@ -4,18 +4,17 @@ from lexer.lexer import Lexer, Token
 def parse(lexer: Lexer, tokens: List[Token]):
     """ inputs: language lexer, tokenized .bnf file """
     print(lexer)
-    print("BNF tokens:") # <type: value>
-    for token in tokens:
-        print(token)
 
     rules = []
     sm = StateMachine()
+    sm.register(SET_LHS, handle_set_lhs)
+    sm.register(ADD_ELEMENT, handle_add_element)
     for token in tokens:
         rule = sm.next(token)
         if rule:
             rules.append(rule)
         
-    print("\nRules:")
+    print("Rules:")
     for rule in rules:
         print(rule)
 
@@ -42,50 +41,58 @@ class Rule:
         new_rules.append(rule)
         self.rules = new_rules
 
+# state machine states
+SET_LHS = "SET_LHS"
+ADD_ELEMENT = "ADD_ELEMENT"
 
 class StateMachine:
-    SET_LHS = "SET_LHS"
-    ADD_ELEMENT = "ADD_ELEMENT"
+    def __init__(self):
+        self.state = SET_LHS
+        self.handlers = {}
 
-    def __init__(self, state=SET_LHS):
-        self.state = state # TODO: change to SET_LHS
-
-    """
-    re-write as follows:
     def next(self, token: Token):
-        self.state, rule = self.handlers[self.state](token)
+        self.state, rule = self.handlers[self.state](self, token)
+        if rule:
+            self.rule = rule
         return rule
 
-    and have a function for registering handlers:
     def register(self, state, handler):
         self.handlers[state] = handler
-    """
-    def next(self, token: Token):
-        if token.type == "BNF_NAME":
 
-            if self.state == self.SET_LHS:
-                self.rule = Rule(token.value)
-                return
+"""
+state machine handlers
+    input: StateMachine, Token
+    returns: state, rule
+"""
 
-            elif self.state == self.ADD_ELEMENT:
-                self.rule.add(token.value)
-                return
+def handle_set_lhs(self, token):
+    """ handles SET_LHS state """
+    if token.type == "BNF_NAME":
+        return SET_LHS, Rule(token.value)
 
-        elif token.type == "COLON":
-            self.state = self.ADD_ELEMENT
-            return
-        
-        elif token.type == "TERMINAL":
-            self.state = self.ADD_ELEMENT
-            self.rule.add(token.value)
-            return
+    elif token.type == "COLON":
+        return ADD_ELEMENT, None
+    
+    else:
+        return SET_LHS, None
+    
+def handle_add_element(self, token):
+    """ handles ADD_ELEMENT state """
+    if token.type == "BNF_NAME":
+        self.rule.add(token.value)
+        return ADD_ELEMENT, None
 
-        elif token.type == "PIPE":
-            self.rule.reduce()
-            self.state = self.ADD_ELEMENT
-            return
+    elif token.type == "TERMINAL":
+        self.rule.add(token.value)
+        return ADD_ELEMENT, None
 
-        elif token.type == "SEMICOLON":
-            self.rule.reduce()
-            self.state = self.SET_LHS
-            return self.rule
+    elif token.type == "PIPE":
+        self.rule.reduce()
+        return ADD_ELEMENT, None
+
+    elif token.type == "SEMICOLON":
+        self.rule.reduce()
+        return SET_LHS, None
+
+    else:
+        return ADD_ELEMENT, None
