@@ -2,21 +2,6 @@ from typing import List
 from lexer.lexer import Lexer, Token
 from repl.repl import repl_bnf
 
-"""
-TODO: represent rules like this instead
-
-Rules:
-<statement: ['VAR_NAME', 'ASSIGNMENT', 'expr']>
-<statement: ['FUNC_NAME', 'ASSIGNMENT', 'expr']>
-<expr: ['expr', 'op', 'expr']>
-<expr: ['op', 'expr']>
-<expr: ['FLOAT']>
-<expr: ['INT']>
-<op: ['ADD']>
-<op: ['SUBTRACT']>
-<op: ['MULTIPLY']>
-<op: ['DIVIDE']>
-"""
 class Rule:
     def __init__(self, lhs):
         self.lhs = lhs
