@@ -47,9 +47,23 @@ example:
 rule = <statement: ['VAR_NAME', 'ASSIGNMENT', 'expr']>
 - capital letters should match a token type
 
-algo:
-expr
-
+shift-reduce algo:
+stack                           input
+$                               a := b + "hi"$
+$a                              := b + "hi"$
+$name                           := b + "hi"$
+$name :=                        b + "hi"$
+$name :=                        b + "hi"$
+$name := b                      + "hi"$
+$name := name                   + "hi"$
+$name := term                   + "hi"$
+$name := term +                 "hi"$
+$name := term op                "hi"$
+$name := term op "hi"           $
+$name := term op term           $
+$name := term expr              $
+$name := expr                   $
+$statement                      $
 
 AstNode:
     type = statement # not strictly necessary

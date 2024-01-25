@@ -1,27 +1,23 @@
 // bnf grammar for language
-statement: expr
-    | VAR_NAME ASSIGNMENT expr
-    | FUNC_NAME ASSIGNMENT expr
-    ; 
+statement: name ASSIGNMENT expr; 
+
+name: VAR_NAME | FUNC_NAME;
 
 // expression
-expr: expr op expr 
-    | op expr 
+expr: term expr
+    | op term 
+    ;
+
+// operands
+term: name 
     | FLOAT 
     | INT 
-    | VAR_NAME 
     | STRING
     ;
 
 // operations
-op: ADD 
+op:   ADD 
     | SUBTRACT
     | MULTIPLY
     | DIVIDE
     ;
-
-// <statement> ::= <variable> ":=" <expression>
-// <expression> ::= <term> | <expression> "+" <term>
-// <term> ::= <variable> | <string_literal>
-// <variable> ::= [a-zA-Z]+
-// <string_literal> ::= "\"" [^\"]* "\""
