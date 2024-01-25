@@ -52,7 +52,7 @@ stack                           input
 $                               a := b + "hi"$
 $a                              := b + "hi"$
 $name                           := b + "hi"$
-$term :=                        b + "hi"$
+$term                           := b + "hi"$
 $term :=                        b + "hi"$
 $term := b                      + "hi"$
 $term := name                   + "hi"$
