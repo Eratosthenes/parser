@@ -45,6 +45,11 @@ def make_ast(rules: List[Rule], tokens: List[Token]):
 """
 example:
 rule = <statement: ['VAR_NAME', 'ASSIGNMENT', 'expr']>
+- capital letters should match a token type
+
+algo:
+expr
+
 
 AstNode:
     type = statement # not strictly necessary

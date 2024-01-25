@@ -3,7 +3,7 @@ from lexer.lexer import Lexer
 
 def repl_bnf(lexer: Lexer, rules):
     line = input(">")
-    if line.lower() == 'q':
+    if line.lower() == '\q':
         sys.exit(0)
     elif line.lower() == 'help':
         print(lexer)
@@ -12,10 +12,10 @@ def repl_bnf(lexer: Lexer, rules):
         return lexer.set(line).lex()
 
 def repl(lexer: Lexer):
-    print("Enter an expression ('q' to quit):")
+    print("Enter an expression ('\q' to quit):")
     while True:
         line = input(">")
-        if line.lower() == 'q':
+        if line.lower() == '\q':
             break
         if line.lower() == 'help':
             print(lexer)
