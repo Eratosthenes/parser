@@ -1,7 +1,5 @@
 // bnf grammar for language
-statement: name ASSIGNMENT expr; 
-
-name: VAR_NAME | FUNC_NAME;
+statement: term ASSIGNMENT expr; 
 
 // expression
 expr: term expr
@@ -14,6 +12,8 @@ term: name
     | INT 
     | STRING
     ;
+
+name: VAR_NAME | FUNC_NAME;
 
 // operations
 op:   ADD 

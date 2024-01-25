@@ -52,18 +52,20 @@ stack                           input
 $                               a := b + "hi"$
 $a                              := b + "hi"$
 $name                           := b + "hi"$
-$name :=                        b + "hi"$
-$name :=                        b + "hi"$
-$name := b                      + "hi"$
-$name := name                   + "hi"$
-$name := term                   + "hi"$
-$name := term +                 "hi"$
-$name := term op                "hi"$
-$name := term op "hi"           $
-$name := term op term           $
-$name := term expr              $
-$name := expr                   $
+$term :=                        b + "hi"$
+$term :=                        b + "hi"$
+$term := b                      + "hi"$
+$term := name                   + "hi"$
+$term := term                   + "hi"$
+$term := term +                 "hi"$
+$term := term op                "hi"$
+$term := term op "hi"           $
+$term := term op term           $
+$term := term expr              $
+$term := expr                   $
 $statement                      $
+
+NOTE: always reduce as far as possible
 
 AstNode:
     type = statement # not strictly necessary
