@@ -5,7 +5,7 @@ def repl_bnf(lexer: Lexer, rules):
     line = input(">")
     if line.lower() == '\q':
         sys.exit(0)
-    elif line.lower() == 'help':
+    elif line.lower() == '\h':
         print(lexer)
         return []
     else:
@@ -17,7 +17,7 @@ def repl(lexer: Lexer):
         line = input(">")
         if line.lower() == '\q':
             break
-        if line.lower() == 'help':
+        if line.lower() == '\h':
             print(lexer)
             continue
 

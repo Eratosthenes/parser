@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Optional
 from lexer.lexer import Lexer, Token
 from repl.repl import repl_bnf
 
 class Rule:
-    def __init__(self, lhs):
+    def __init__(self, lhs: str):
         self.lhs = lhs
         self.elements: List[str] = [] # token.value strings
     
@@ -13,11 +13,17 @@ class Rule:
     def add(self, element):
         self.elements.append(element)
     
+class AstNode:
+    def __init__(self, rule: Optional[Rule]):
+        self.rule = rule # eg, statement, expr, op
+        self.tokens = [] # any resolved tokens for rule
+        self.children = [] # contains AstNodes
+    
 def parse_bnf(lexer: Lexer, tokens: List[Token]):
     """ inputs: language lexer, tokenized .bnf file """
     print(lexer)
 
-    rules = []
+    rules: List[Rule] = []
     sm = StateMachine()
     for token in tokens:
         rule = sm.next(token)
@@ -28,19 +34,60 @@ def parse_bnf(lexer: Lexer, tokens: List[Token]):
     for rule in rules:
         print(rule)
 
-    print("Enter an expression ('q' to quit):")
+    print("Enter an expression ('\q' to quit):")
     while True:
         tokens = repl_bnf(lexer, rules)
         print(tokens)
-        ast = make_ast(rules, tokens) # TODO: make this a class
+        ast = make_ast(rules, tokens)
         print(ast)
 
-def make_ast(rules: List[Rule], tokens: List[Token]):
-    stack = []
-    token = tokens[0]
-    for rule in rules:
-        pass
-    return
+class Ast:
+    def __init__(self, rules: List[Rule]):
+        self.rules = rules
+        self.stack: List[AstNode] = []
+        self.root: Optional[AstNode] = None
+    
+    def process(self, token: Token):
+        if len(self.stack) == 0:
+            rule = self._matches_rule([token])
+            if rule:
+                self.root = AstNode(rule)
+
+        self.stack.insert(0, token)
+        print("stack:")
+        for i in range(len(self.stack)):
+            last_tokens = list(reversed(self.stack[:i+1]))
+            print(last_tokens)
+            rule = self._matches_rule(last_tokens)
+            if rule:
+                print("rule found:", rule)
+
+        print("done processing")
+        return
+    
+    def _matches_rule(self, tokens: List[Token]) -> Rule:
+        def is_match(tokens: List[Token], elements: List[str]) -> bool:
+            for token, element in zip(tokens, elements):
+                if token.type == element:
+                    return True                
+
+            return False
+
+        for rule in self.rules:
+            if len(tokens) == len(rule.elements):
+                if is_match(tokens, rule.elements):
+                    print("rule match found:", rule)
+                    return rule
+        
+        print("no rule match found")
+        return
+    
+def make_ast(rules: List[Rule], tokens: List[Token]) -> AstNode:
+    ast = Ast(rules)
+    for token in tokens:
+        ast.process(token)
+
+    return ast
 
 """
 example:
@@ -48,11 +95,11 @@ rule = <statement: ['VAR_NAME', 'ASSIGNMENT', 'expr']>
 - capital letters should match a token type
 
 shift-reduce algo:
-stack                           input
+stack                           input           rule:
 $                               a := b + "hi"$
-$a                              := b + "hi"$
-$name                           := b + "hi"$
-$term                           := b + "hi"$
+$a                              := b + "hi"$    
+$name                           := b + "hi"$    <name: ['VAR_NAME']>
+$term                           := b + "hi"$    <term: ['name']>
 $term :=                        b + "hi"$
 $term := b                      + "hi"$
 $term := name                   + "hi"$
@@ -81,12 +128,7 @@ AstNode:
     token = <VAR_NAME, 'a'>
     children = []
 """
-class AstNode:
-    def __init__(self, rule):
-        self.type = rule.lhs # eg, statement, expr, op
-        self.tokens = [] # any resolved tokens for rule
-        self.children = [] # contains AstNodes
-    
+
 # state machine states
 SET_LHS = "SET_LHS"
 ADD_RULE = "ADD_RULE"
@@ -98,7 +140,7 @@ class StateMachine:
         self.register(SET_LHS, self._handle_set_lhs)
         self.register(ADD_RULE, self._handle_add_rule)
 
-    def next(self, token: Token):
+    def next(self, token: Token) -> Rule:
         self.state, rule = self.handlers[self.state](token)
         if rule:
             return rule
@@ -106,8 +148,11 @@ class StateMachine:
     def register(self, state, handler):
         self.handlers[state] = handler
 
-    def _handle_set_lhs(self, token):
-        """ handles SET_LHS state """
+    def _handle_set_lhs(self, token: Token) -> tuple[str, Rule]:
+        """ 
+        handles SET_LHS state 
+        returns: (state, Rule)
+        """
         if token.type == "BNF_NAME":
             self.rule = Rule(token.value)
             return SET_LHS, None
@@ -118,8 +163,11 @@ class StateMachine:
         else: # token.type == "COMMENT"
             return SET_LHS, None
         
-    def _handle_add_rule(self, token):
-        """ handles ADD_RULE state """
+    def _handle_add_rule(self, token: Token) -> tuple[str, Rule]:
+        """ 
+        handles ADD_RULE state 
+        returns: (state, Rule)
+        """
         if token.type == "BNF_NAME":
             self.rule.add(token.value)
             return ADD_RULE, None
