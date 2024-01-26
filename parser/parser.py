@@ -48,7 +48,7 @@ def parse_bnf(lexer: Lexer, tokens: List[Token]):
 class Ast:
     def __init__(self, rules: List[Rule]):
         self.rules = rules
-        self.stack: List[AstNode] = []
+        self.stack: str = []
         self.root: Optional[AstNode] = None
     
     def process(self, token: Token):
@@ -57,34 +57,38 @@ class Ast:
             if rule:
                 self.root = AstNode(rule)
 
-        ast_node = AstNode(None).set_tokens([token])
-        self.stack.insert(0, ast_node)
-        print("stack:")
-        for i in range(len(self.stack)):
-            last_tokens = list(reversed(self.stack[:i+1]))
-            print(last_tokens)
-            rule = self._matches_rule(last_tokens) # ISSUE here
-            if rule:
-                print("rule found:", rule)
+        self.stack.append(token.type)
+        print(self.stack)
+        is_reduced = self._reduce_stack()
+        while is_reduced:
+            is_reduced = self._reduce_stack()
 
-        print("done processing")
         return
     
-    def _matches_rule(self, tokens: List[Token]) -> Optional[Rule]:
-        def is_match(tokens: List[Token], elements: List[str]) -> bool:
-            for token, element in zip(tokens, elements):
-                if token.type == element:
-                    return True                
+    def _reduce_stack(self) -> bool:
+        for i in range(len(self.stack))[::-1]:
+            last_tokens = self.stack[i:]
+            rule = self._matches_rule(last_tokens)
+            if rule:
+                self.stack[i:] = [rule.lhs]
+                print(self.stack)
+                return True
 
-            return False
+        return False
+    
+    def _matches_rule(self, token_types: List[str]) -> Optional[Rule]:
+        def is_match(token_types: List[str], elements: List[str]) -> bool:
+            for token_type, element in zip(token_types, elements):
+                if token_type != element:
+                    return False                
+
+            return True
 
         for rule in self.rules:
-            if len(tokens) == len(rule.elements):
-                if is_match(tokens, rule.elements):
-                    print("rule match found:", rule)
+            if len(token_types) == len(rule.elements):
+                if is_match(token_types, rule.elements):
                     return rule
         
-        print("no rule match found")
         return None
     
 def make_ast(rules: List[Rule], tokens: List[Token]) -> Ast:
