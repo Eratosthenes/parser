@@ -16,12 +16,97 @@ class Rule:
 class AstNode:
     def __init__(self, rule: Optional[Rule]):
         self.rule = rule
+        self.is_literal: bool = self._is_literal() if self.rule else False
         self.tokens: List[Token] = []
         self.children: List[AstNode] = []
+    
+    def __repr__(self):
+        s = ""
+        if self.rule:
+            s+=f" rule: {self.rule} "
+        if self.is_literal:
+            s+=f" LITERAL "
+        if len(self.tokens) > 0:
+            s+=f" tokens: {self.tokens} "
+        return "<" + s.strip() + ">"
+    
+    def _is_literal(self) -> bool:
+        length_is_one = len(self.rule.elements) == 1
+        if not length_is_one:
+            return False
+        
+        element = self.rule.elements[0]
+        return element.upper() == element
     
     def set_tokens(self, tokens: List[Token]):
         self.tokens = tokens
         return self
+    
+"""
+AstNode:
+    rule = statement # not strictly necessary
+    literal = bool
+    token = None
+    children = [
+        AstNode{.type=literal, .token=<VAR_NAME, 'a'>}, 
+        AstNode{.type-literal, .token=<ASSIGNMENT, ':='>}, 
+        AstNode{.type=expr, children=[...]}
+    ]
+
+AstNode:
+    type = literal
+    token = <VAR_NAME, 'a'>
+    children = []
+"""
+
+class Ast:
+    def __init__(self, rules: List[Rule]):
+        self.rules = rules
+        self.stack: str = []
+        self.ast_stack: List[AstNode] = []
+        self.root: Optional[AstNode] = None
+    
+    def process(self, token: Token):
+        if len(self.stack) == 0:
+            rule = self._matches_rule([token])
+            if rule:
+                self.root = AstNode(rule)
+
+        self.stack.append(token.type)
+        self.ast_stack.append(AstNode(None).set_tokens([token]))
+        print(self.stack)
+        print(self.ast_stack)
+        is_reduced = self._reduce_stack()
+        while is_reduced:
+            is_reduced = self._reduce_stack()
+
+        return
+    
+    def _reduce_stack(self) -> bool:
+        for i in range(len(self.stack))[::-1]:
+            rule = self._matches_rule(self.stack[i:])
+            if rule:
+                self.stack[i:] = [rule.lhs]
+                print(self.stack)
+                print(self.ast_stack)
+                return True
+
+        return False
+    
+    def _matches_rule(self, token_types: List[str]) -> Optional[Rule]:
+        def is_match(token_types: List[str], elements: List[str]) -> bool:
+            for token_type, element in zip(token_types, elements):
+                if token_type != element:
+                    return False                
+
+            return True
+
+        for rule in self.rules:
+            if len(token_types) == len(rule.elements):
+                if is_match(token_types, rule.elements):
+                    return rule
+        
+        return None
     
 def parse_bnf(lexer: Lexer, tokens: List[Token]):
     """ inputs: language lexer, tokenized .bnf file """
@@ -45,52 +130,6 @@ def parse_bnf(lexer: Lexer, tokens: List[Token]):
         ast = make_ast(rules, tokens)
         print(ast)
 
-class Ast:
-    def __init__(self, rules: List[Rule]):
-        self.rules = rules
-        self.stack: str = []
-        self.root: Optional[AstNode] = None
-    
-    def process(self, token: Token):
-        if len(self.stack) == 0:
-            rule = self._matches_rule([token])
-            if rule:
-                self.root = AstNode(rule)
-
-        self.stack.append(token.type)
-        print(self.stack)
-        is_reduced = self._reduce_stack()
-        while is_reduced:
-            is_reduced = self._reduce_stack()
-
-        return
-    
-    def _reduce_stack(self) -> bool:
-        for i in range(len(self.stack))[::-1]:
-            last_tokens = self.stack[i:]
-            rule = self._matches_rule(last_tokens)
-            if rule:
-                self.stack[i:] = [rule.lhs]
-                print(self.stack)
-                return True
-
-        return False
-    
-    def _matches_rule(self, token_types: List[str]) -> Optional[Rule]:
-        def is_match(token_types: List[str], elements: List[str]) -> bool:
-            for token_type, element in zip(token_types, elements):
-                if token_type != element:
-                    return False                
-
-            return True
-
-        for rule in self.rules:
-            if len(token_types) == len(rule.elements):
-                if is_match(token_types, rule.elements):
-                    return rule
-        
-        return None
-    
 def make_ast(rules: List[Rule], tokens: List[Token]) -> Ast:
     ast = Ast(rules)
     for token in tokens:
@@ -123,19 +162,6 @@ $statement                      $
 
 NOTE: always reduce as far as possible
 
-AstNode:
-    type = statement # not strictly necessary
-    token = None
-    children = [
-        AstNode{.type=literal, .token=<VAR_NAME, 'a'>}, 
-        AstNode{.type-literal, .token=<ASSIGNMENT, ':='>}, 
-        AstNode{.type=expr, children=[...]}
-    ]
-
-AstNode:
-    type = literal
-    token = <VAR_NAME, 'a'>
-    children = []
 """
 
 # state machine states
