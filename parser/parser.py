@@ -16,7 +16,7 @@ class Rule:
 class AstNode:
     def __init__(self, rule: Optional[Rule]):
         self.rule = rule
-        self.is_literal: bool = self._is_literal() if self.rule else False
+        self.literal: bool = self.is_literal() if self.rule else False
         self.tokens: List[Token] = []
         self.children: List[AstNode] = []
     
@@ -24,22 +24,25 @@ class AstNode:
         s = ""
         if self.rule:
             s+=f" rule: {self.rule} "
-        if self.is_literal:
+        if self.literal:
             s+=f" LITERAL "
         if len(self.tokens) > 0:
             s+=f" tokens: {self.tokens} "
         return "{" + s.strip() + "}"
     
-    def _is_literal(self) -> bool:
+    def is_literal(self) -> bool:
         length_is_one = self.rule and len(self.rule.elements) == 1
         if not length_is_one:
             return False
         
-        element = self.rule.elements[0] if self.rule else "x"
+        if self.rule:
+            element = self.rule.elements[0]
+        else:
+            return False
         return element.upper() == element
     
-    def set_tokens(self, tokens: List[Token]):
-        self.tokens = tokens
+    def add(self, token: Token):
+        self.tokens.append(token)
         return self
     
 """
@@ -65,29 +68,48 @@ class Ast:
         self.stack: List[str] = []
         self.ast_stack: List[AstNode] = []
         self.root: Optional[AstNode] = None
+
+    def traverse(self, ast_node: Optional[AstNode]=None, depth: int=0):
+        if not ast_node:
+            ast_node = self.ast_stack[0]
+
+        print("\t"*depth + "node:", ast_node)
+        for child in ast_node.children:
+            self.traverse(child, depth+1)
     
     def process(self, token: Token):
-        # self.ast_stack.append(AstNode(None).set_tokens([token]))
-        # print("ast stack:", self.ast_stack)
+        # shift
         self.stack.append(token.type)
+        
+        # handle initial AstNode
+        rule = self._matches_rule(self.stack)
+        if rule:
+            self.ast_stack.append(AstNode(rule).add(token))
+        else:
+            self.ast_stack[-1].add(token)
+
+        # reduce
         print("stack before:", self.stack)
-        is_reduced = self._reduce_stack()
+        is_reduced = self._reduce_stack(token)
         while is_reduced:
-            is_reduced = self._reduce_stack()
+            is_reduced = self._reduce_stack(token)
 
         print("stack after:", self.stack)
         return
     
-    def _reduce_stack(self) -> bool:
+    def _reduce_stack(self, token: Token) -> bool:
         for i in range(len(self.stack))[::-1]:
             rule = self._matches_rule(self.stack[i:])
             if rule:
+                print("rule match:", rule)
                 self.stack[i:] = [rule.lhs]
                 # rule, token, children
-                # old_ast = self.ast_stack[i]
-                # new_ast = AstNode(rule).set_tokens(old_ast.tokens)
-                # new_ast.children = self.ast_stack[i:]
-                # self.ast_stack[i:] = [new_ast]
+                new_ast = AstNode(rule)
+                if new_ast.literal:
+                    new_ast.add(token)
+
+                new_ast.children = self.ast_stack[i:]
+                self.ast_stack[i:] = [new_ast]
                 return True
 
         return False
@@ -127,7 +149,7 @@ def parse_bnf(lexer: Lexer, tokens: List[Token]):
         tokens = repl_bnf(lexer, rules)
         print(tokens)
         ast = make_ast(rules, tokens)
-        print(ast)
+        ast.traverse()
 
 def make_ast(rules: List[Rule], tokens: List[Token]) -> Ast:
     ast = Ast(rules)
