@@ -15,9 +15,13 @@ class Rule:
     
 class AstNode:
     def __init__(self, rule: Optional[Rule]):
-        self.rule = rule # eg, statement, expr, op
-        self.tokens = [] # any resolved tokens for rule
-        self.children = [] # contains AstNodes
+        self.rule = rule
+        self.tokens: List[Token] = []
+        self.children: List[AstNode] = []
+    
+    def set_tokens(self, tokens: List[Token]):
+        self.tokens = tokens
+        return self
     
 def parse_bnf(lexer: Lexer, tokens: List[Token]):
     """ inputs: language lexer, tokenized .bnf file """
@@ -53,19 +57,20 @@ class Ast:
             if rule:
                 self.root = AstNode(rule)
 
-        self.stack.insert(0, token)
+        ast_node = AstNode(None).set_tokens([token])
+        self.stack.insert(0, ast_node)
         print("stack:")
         for i in range(len(self.stack)):
             last_tokens = list(reversed(self.stack[:i+1]))
             print(last_tokens)
-            rule = self._matches_rule(last_tokens)
+            rule = self._matches_rule(last_tokens) # ISSUE here
             if rule:
                 print("rule found:", rule)
 
         print("done processing")
         return
     
-    def _matches_rule(self, tokens: List[Token]) -> Rule:
+    def _matches_rule(self, tokens: List[Token]) -> Optional[Rule]:
         def is_match(tokens: List[Token], elements: List[str]) -> bool:
             for token, element in zip(tokens, elements):
                 if token.type == element:
@@ -80,9 +85,9 @@ class Ast:
                     return rule
         
         print("no rule match found")
-        return
+        return None
     
-def make_ast(rules: List[Rule], tokens: List[Token]) -> AstNode:
+def make_ast(rules: List[Rule], tokens: List[Token]) -> Ast:
     ast = Ast(rules)
     for token in tokens:
         ast.process(token)
@@ -140,15 +145,16 @@ class StateMachine:
         self.register(SET_LHS, self._handle_set_lhs)
         self.register(ADD_RULE, self._handle_add_rule)
 
-    def next(self, token: Token) -> Rule:
+    def next(self, token: Token) -> Optional[Rule]:
         self.state, rule = self.handlers[self.state](token)
         if rule:
             return rule
+        return None
 
     def register(self, state, handler):
         self.handlers[state] = handler
 
-    def _handle_set_lhs(self, token: Token) -> tuple[str, Rule]:
+    def _handle_set_lhs(self, token: Token) -> tuple[str, Optional[Rule]]:
         """ 
         handles SET_LHS state 
         returns: (state, Rule)
@@ -163,7 +169,7 @@ class StateMachine:
         else: # token.type == "COMMENT"
             return SET_LHS, None
         
-    def _handle_add_rule(self, token: Token) -> tuple[str, Rule]:
+    def _handle_add_rule(self, token: Token) -> tuple[str, Optional[Rule]]:
         """ 
         handles ADD_RULE state 
         returns: (state, Rule)
@@ -183,3 +189,6 @@ class StateMachine:
 
         elif token.type == "SEMICOLON":
             return SET_LHS, self.rule
+        
+        else:
+            return ADD_RULE, None
