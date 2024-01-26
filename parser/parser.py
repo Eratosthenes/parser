@@ -28,14 +28,14 @@ class AstNode:
             s+=f" LITERAL "
         if len(self.tokens) > 0:
             s+=f" tokens: {self.tokens} "
-        return "<" + s.strip() + ">"
+        return "{" + s.strip() + "}"
     
     def _is_literal(self) -> bool:
-        length_is_one = len(self.rule.elements) == 1
+        length_is_one = self.rule and len(self.rule.elements) == 1
         if not length_is_one:
             return False
         
-        element = self.rule.elements[0]
+        element = self.rule.elements[0] if self.rule else "x"
         return element.upper() == element
     
     def set_tokens(self, tokens: List[Token]):
@@ -62,24 +62,20 @@ AstNode:
 class Ast:
     def __init__(self, rules: List[Rule]):
         self.rules = rules
-        self.stack: str = []
+        self.stack: List[str] = []
         self.ast_stack: List[AstNode] = []
         self.root: Optional[AstNode] = None
     
     def process(self, token: Token):
-        if len(self.stack) == 0:
-            rule = self._matches_rule([token])
-            if rule:
-                self.root = AstNode(rule)
-
+        # self.ast_stack.append(AstNode(None).set_tokens([token]))
+        # print("ast stack:", self.ast_stack)
         self.stack.append(token.type)
-        self.ast_stack.append(AstNode(None).set_tokens([token]))
-        print(self.stack)
-        print(self.ast_stack)
+        print("stack before:", self.stack)
         is_reduced = self._reduce_stack()
         while is_reduced:
             is_reduced = self._reduce_stack()
 
+        print("stack after:", self.stack)
         return
     
     def _reduce_stack(self) -> bool:
@@ -87,8 +83,11 @@ class Ast:
             rule = self._matches_rule(self.stack[i:])
             if rule:
                 self.stack[i:] = [rule.lhs]
-                print(self.stack)
-                print(self.ast_stack)
+                # rule, token, children
+                # old_ast = self.ast_stack[i]
+                # new_ast = AstNode(rule).set_tokens(old_ast.tokens)
+                # new_ast.children = self.ast_stack[i:]
+                # self.ast_stack[i:] = [new_ast]
                 return True
 
         return False
