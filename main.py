@@ -1,8 +1,7 @@
 import re
 import sys
 from lexer.lexer import TokenTable, Lexer
-from parser.parser import parse_bnf
-from repl.repl import repl
+from lexer.repl import repl, parse_bnf
 
 def read_tokfile(filename):
     """ returns: TokenTable """

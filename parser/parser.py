@@ -1,6 +1,5 @@
 from typing import List, Optional
-from lexer.lexer import Lexer, Token
-from repl.repl import repl_bnf
+from lexer.lexer import Token
 
 class Rule:
     def __init__(self, lhs: str):
@@ -99,36 +98,6 @@ class Ast:
         
         return None
     
-def parse_bnf(lexer: Lexer, tokens: List[Token]):
-    """ inputs: language lexer, tokenized .bnf file """
-    print(lexer)
-
-    rules: List[Rule] = []
-    sm = StateMachine()
-    for token in tokens:
-        rule = sm.next(token)
-        if rule:
-            rules.append(rule)
-        
-    print("Rules:")
-    for rule in rules:
-        print(rule)
-
-    print("Enter an expression ('\q' to quit):")
-    while True:
-        tokens = repl_bnf(lexer, rules)
-        print("tokens:", tokens)
-        ast = make_ast(rules, tokens)
-        print("ast:") 
-        ast.traverse()
-
-def make_ast(rules: List[Rule], tokens: List[Token]) -> Ast:
-    ast = Ast(rules)
-    for token in tokens:
-        ast.process(token)
-
-    return ast
-
 # state machine states
 SET_LHS = "SET_LHS"
 ADD_RULE = "ADD_RULE"
