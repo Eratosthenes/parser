@@ -12,56 +12,31 @@ class Rule:
     
     def add(self, element):
         self.elements.append(element)
+
+    def is_literal(self) -> bool:
+        if len(self.elements) != 1:
+            return False
+
+        return self.elements[0].upper() == self.elements
     
 class AstNode:
     def __init__(self, rule: Optional[Rule]):
         self.rule = rule
-        self.literal: bool = self.is_literal() if self.rule else False
-        self.tokens: List[Token] = []
+        self.token: Optional[Token] = None
         self.children: List[AstNode] = []
     
     def __repr__(self):
         s = ""
         if self.rule:
-            s+=f" rule: {self.rule} "
-        if self.literal:
-            s+=f" LITERAL "
-        if len(self.tokens) > 0:
-            s+=f" tokens: {self.tokens} "
+            s+=f" rule:{self.rule} "
+        if self.token:
+            s+=f" tok:{self.token} "
         return "{" + s.strip() + "}"
     
-    def is_literal(self) -> bool:
-        length_is_one = self.rule and len(self.rule.elements) == 1
-        if not length_is_one:
-            return False
-        
-        if self.rule:
-            element = self.rule.elements[0]
-        else:
-            return False
-        return element.upper() == element
-    
-    def add(self, token: Token):
-        self.tokens.append(token)
+    def set(self, token: Token):
+        self.token = token
         return self
     
-"""
-AstNode:
-    rule = statement # not strictly necessary
-    literal = bool
-    token = None
-    children = [
-        AstNode{.type=literal, .token=<VAR_NAME, 'a'>}, 
-        AstNode{.type-literal, .token=<ASSIGNMENT, ':='>}, 
-        AstNode{.type=expr, children=[...]}
-    ]
-
-AstNode:
-    type = literal
-    token = <VAR_NAME, 'a'>
-    children = []
-"""
-
 class Ast:
     def __init__(self, rules: List[Rule]):
         self.rules = rules
@@ -81,32 +56,27 @@ class Ast:
         # shift
         self.stack.append(token.type)
         
-        # handle initial AstNode
-        rule = self._matches_rule(self.stack)
+        # handle initial AstNode and incoming tokens
+        rule = self._matches_rule([self.stack[-1]])
         if rule:
-            self.ast_stack.append(AstNode(rule).add(token))
+            self.ast_stack.append(AstNode(rule).set(token))
         else:
-            self.ast_stack[-1].add(token)
+            self.ast_stack.append(AstNode(None).set(token))
 
         # reduce
-        print("stack before:", self.stack)
         is_reduced = self._reduce_stack(token)
         while is_reduced:
             is_reduced = self._reduce_stack(token)
-
-        print("stack after:", self.stack)
-        return
     
     def _reduce_stack(self, token: Token) -> bool:
         for i in range(len(self.stack))[::-1]:
             rule = self._matches_rule(self.stack[i:])
             if rule:
-                print("rule match:", rule)
-                self.stack[i:] = [rule.lhs]
-                # rule, token, children
+                self.stack[i:] = [rule.lhs] # reduce stack
+                # reduce ast: rule, token, children
                 new_ast = AstNode(rule)
-                if new_ast.literal:
-                    new_ast.add(token)
+                if rule.is_literal():
+                    new_ast.set(token)
 
                 new_ast.children = self.ast_stack[i:]
                 self.ast_stack[i:] = [new_ast]
@@ -147,8 +117,9 @@ def parse_bnf(lexer: Lexer, tokens: List[Token]):
     print("Enter an expression ('\q' to quit):")
     while True:
         tokens = repl_bnf(lexer, rules)
-        print(tokens)
+        print("tokens:", tokens)
         ast = make_ast(rules, tokens)
+        print("ast:") 
         ast.traverse()
 
 def make_ast(rules: List[Rule], tokens: List[Token]) -> Ast:
@@ -157,33 +128,6 @@ def make_ast(rules: List[Rule], tokens: List[Token]) -> Ast:
         ast.process(token)
 
     return ast
-
-"""
-example:
-rule = <statement: ['VAR_NAME', 'ASSIGNMENT', 'expr']>
-- capital letters should match a token type
-
-shift-reduce algo:
-stack                           input           rule:
-$                               a := b + "hi"$
-$a                              := b + "hi"$    
-$name                           := b + "hi"$    <name: ['VAR_NAME']>
-$term                           := b + "hi"$    <term: ['name']>
-$term :=                        b + "hi"$
-$term := b                      + "hi"$
-$term := name                   + "hi"$
-$term := term                   + "hi"$
-$term := term +                 "hi"$
-$term := term op                "hi"$
-$term := term op "hi"           $
-$term := term op term           $
-$term := term expr              $
-$term := expr                   $
-$statement                      $
-
-NOTE: always reduce as far as possible
-
-"""
 
 # state machine states
 SET_LHS = "SET_LHS"
