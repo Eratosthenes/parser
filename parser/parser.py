@@ -40,10 +40,15 @@ class Ast:
     def __init__(self, rules: List[Rule]):
         self.rules = rules
         self.stack: List[str] = []
+        self.stack_hist: List[List[str]] = []
         self.ast_stack: List[AstNode] = []
         self.root: Optional[AstNode] = None
+    
+    def stack_history(self):
+        for stack in self.stack_hist:
+            print(stack)
 
-    def traverse(self, ast_node: Optional[AstNode]=None, depth: int=0):
+    def print(self, ast_node: Optional[AstNode]=None, depth: int=0):
         if not self.ast_stack:
             return
         if not ast_node:
@@ -51,7 +56,7 @@ class Ast:
 
         print("\t"*depth + "node:", ast_node)
         for child in ast_node.children:
-            self.traverse(child, depth+1)
+            self.print(child, depth+1)
     
     def process(self, token: Token):
         # shift
@@ -66,6 +71,7 @@ class Ast:
         for i in range(len(self.stack))[::-1]:
             rule = self._matches_rule(self.stack[i:])
             if rule:
+                self.stack_hist.append(self.stack.copy())
                 self.stack[i:] = [rule.lhs] # reduce stack
                 # reduce ast: rule, token, children
                 new_ast = AstNode(rule)
@@ -76,6 +82,7 @@ class Ast:
                 self.ast_stack[i:] = [new_ast]
                 return True
 
+        self.stack_hist.append(self.stack.copy())
         return False
     
     def _matches_rule(self, token_types: List[str]) -> Optional[Rule]:
