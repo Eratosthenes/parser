@@ -1,6 +1,5 @@
 from typing import List, Optional
 from lexer.lexer import Token
-from parser.eval import eval_op
 
 class Rule:
     def __init__(self, lhs: str):
@@ -45,31 +44,6 @@ class Ast:
         self.ast_stack: List[AstNode] = []
         self.root: Optional[AstNode] = None
     
-    def eval_stack(self) -> List[List[Token]]:
-        def _eval(node: AstNode):
-            r = []
-            for child in node.children:
-                if child.token:
-                    r.append(child.token)
-                else: 
-                    _eval(child)
-            eval_stack.append(r)
-
-        eval_stack: List[List[Token]] = []
-        _eval(self.ast_stack[0])
-        return eval_stack
-
-    def eval(self):
-        """ evaluate an expression """
-        es = self.eval_stack()
-        expr = es.pop()
-        result = eval_op(expr)
-        while es:
-            expr = es.pop()
-            result = eval_op([result]+expr)
-
-        return result
-    
     def stack_history(self):
         for stack in self.stack_hist:
             print(stack)
@@ -84,14 +58,21 @@ class Ast:
         for child in ast_node.children:
             self.print(child, depth+1)
     
-    def process(self, token: Token):
-        # shift
-        self.stack.append(token.type)
+    def parse(self, tokens: List[Token]):
+        """ parse a list of tokens """
+        for token in tokens:
+            self._parse(token)
+
+    def _parse(self, token: Token):
+        """ LR parse a single token """
+        self.stack.append(token.type) # shift
         
         # reduce
         is_reduced = self._reduce_stack(token)
         while is_reduced:
             is_reduced = self._reduce_stack(token)
+        
+        self.root = self.ast_stack[0]
     
     def _reduce_stack(self, token: Token) -> bool:
         for i in range(len(self.stack))[::-1]:

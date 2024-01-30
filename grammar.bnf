@@ -1,5 +1,9 @@
 // bnf grammar for language
-statement: expr ASSIGNMENT term; 
+// NOTE: capital words match to tokens
+statement: expr assignment term; 
+
+// assignment
+assignment: ASSIGNMENT;
 
 // expression
 expr: expr op term

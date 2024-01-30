@@ -2,6 +2,7 @@ import sys
 from typing import List
 from lexer.lexer import Lexer, Token
 from parser.parser import Rule, StateMachine, Ast
+from interpreter.interpreter import Interpreter
 
 def repl(lexer: Lexer):
     print("Enter an expression ('\q' to quit):")
@@ -45,17 +46,16 @@ def parse_bnf(lexer: Lexer, tokens: List[Token]):
     while True:
         tokens = repl_bnf(lexer, rules)
         print("tokens:", tokens)
-        ast = make_ast(rules, tokens)
+
+        ast = Ast(rules)
+        ast.parse(tokens)
+
         print("stack:")
         ast.stack_history()
+
         print("ast:") 
         ast.print()
+
+        itr = Interpreter(ast.root)
         print("eval stack:")
-        print(ast.eval_stack())
-
-def make_ast(rules: List[Rule], tokens: List[Token]) -> Ast:
-    ast = Ast(rules)
-    for token in tokens:
-        ast.process(token)
-
-    return ast
+        print(itr.eval_stack())
