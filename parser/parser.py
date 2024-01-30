@@ -16,7 +16,7 @@ class Rule:
         if len(self.elements) != 1:
             return False
 
-        return self.elements[0].upper() == self.elements
+        return self.elements[0].upper() == self.elements[0]
     
 class AstNode:
     def __init__(self, rule: Optional[Rule]):
