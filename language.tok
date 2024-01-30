@@ -6,6 +6,8 @@ NEWLINE "\n"
 TAB "\t"
 STRING "".*""
 ERROR ""[^"]*"
+
+# names
 NAME "[a-z]+\w*"
 USER_TYPE "[A-Z]+\w*"
 ITER_FUNC_NAME "_?[a-z]+\w*"

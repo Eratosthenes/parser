@@ -165,3 +165,12 @@ class StateMachine:
         
         else:
             return ADD_RULE, None
+
+class RuleSet:
+    def __init__(self, bnf_tokens: List[Token]):
+        self.rules: List[Token] = []
+        sm = StateMachine()
+        for token in bnf_tokens:
+            rule = sm.next(token)
+            if rule:
+                self.rules.append(rule)

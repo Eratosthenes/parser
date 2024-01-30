@@ -1,7 +1,7 @@
 import re
 import sys
 from lexer.lexer import TokenTable, Lexer
-from lexer.repl import repl, parse_bnf
+from lexer.repl import lexer_repl, repl
 
 def read_tokfile(filename):
     """ returns: TokenTable """
@@ -74,7 +74,7 @@ def make_dict(arg_str):
 def main():
     # main.py
     if len(sys.argv) == 1: 
-        repl(Lexer(read_tokfile('language.tok')))
+        lexer_repl(Lexer(read_tokfile('language.tok')))
         sys.exit(0)
     else:
         args = ' '.join(sys.argv[1:])
@@ -104,7 +104,7 @@ def main():
         grammar_bnf = open(arg_d["lang"]).read()
         grammar_tokens = bnf_lexer.set(grammar_bnf).lex() 
 
-        parse_bnf(lang_lexer, grammar_tokens)
+        repl(lang_lexer, grammar_tokens)
 
 if __name__=='__main__':
     main()

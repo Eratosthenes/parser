@@ -1,5 +1,5 @@
 // bnf grammar for language
-// NOTE: capital words match to tokens
+// NOTE: uppercase words match to tokens
 statement: expr assignment term; 
 
 // assignment

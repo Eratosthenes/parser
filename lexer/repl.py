@@ -1,10 +1,11 @@
 import sys
 from typing import List
 from lexer.lexer import Lexer, Token
-from parser.parser import Rule, StateMachine, Ast
+from parser.parser import Rule, RuleSet, Ast
 from interpreter.interpreter import Interpreter
 
-def repl(lexer: Lexer):
+def lexer_repl(lexer: Lexer):
+    """ prints tokenized input """
     print("Enter an expression ('\q' to quit):")
     while True:
         line = input(">")
@@ -27,17 +28,13 @@ def repl_bnf(lexer: Lexer, rules: List[Rule]):
     else:
         return lexer.set(line).lex()
 
-def parse_bnf(lexer: Lexer, tokens: List[Token]):
-    """ inputs: language lexer, tokenized .bnf file """
+def repl(lexer: Lexer, bnf_tokens: List[Token]):
+    """ 
+    REPL for programming language
+    inputs: language lexer, tokenized .bnf file """
     print(lexer)
 
-    rules: List[Rule] = []
-    sm = StateMachine()
-    for token in tokens:
-        rule = sm.next(token)
-        if rule:
-            rules.append(rule)
-        
+    rules = RuleSet(bnf_tokens).rules
     print("Rules:")
     for rule in rules:
         print(rule)
