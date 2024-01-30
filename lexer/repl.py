@@ -46,10 +46,10 @@ def parse_bnf(lexer: Lexer, tokens: List[Token]):
         tokens = repl_bnf(lexer, rules)
         print("tokens:", tokens)
         ast = make_ast(rules, tokens)
-        print("ast:") 
-        ast.print()
         print("stack:")
         ast.stack_history()
+        print("ast:") 
+        ast.print()
 
 def make_ast(rules: List[Rule], tokens: List[Token]) -> Ast:
     ast = Ast(rules)
