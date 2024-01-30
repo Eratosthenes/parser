@@ -2,10 +2,8 @@
 statement: expr ASSIGNMENT term; 
 
 // expression
-expr: expr term
-    | expr op
-    | term op
-    | expr expr
+expr: expr op term
+    | term op term
     ;
 
 // operands
