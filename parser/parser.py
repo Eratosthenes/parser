@@ -44,6 +44,20 @@ class Ast:
         self.ast_stack: List[AstNode] = []
         self.root: Optional[AstNode] = None
     
+    def eval(self) -> List[List[Token]]:
+        def _eval(node: AstNode):
+            r = []
+            for child in node.children:
+                if child.token:
+                    r.append(child.token)
+                else: 
+                    _eval(child)
+            eval_stack.append(r)
+
+        eval_stack: List[List[Token]] = []
+        _eval(self.ast_stack[0])
+        return eval_stack
+    
     def stack_history(self):
         for stack in self.stack_hist:
             print(stack)
