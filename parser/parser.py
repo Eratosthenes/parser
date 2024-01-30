@@ -1,5 +1,6 @@
 from typing import List, Optional
 from lexer.lexer import Token
+from parser.eval import eval_op
 
 class Rule:
     def __init__(self, lhs: str):
@@ -44,7 +45,7 @@ class Ast:
         self.ast_stack: List[AstNode] = []
         self.root: Optional[AstNode] = None
     
-    def eval(self) -> List[List[Token]]:
+    def eval_stack(self) -> List[List[Token]]:
         def _eval(node: AstNode):
             r = []
             for child in node.children:
@@ -57,6 +58,17 @@ class Ast:
         eval_stack: List[List[Token]] = []
         _eval(self.ast_stack[0])
         return eval_stack
+
+    def eval(self):
+        """ evaluate an expression """
+        es = self.eval_stack()
+        expr = es.pop()
+        result = eval_op(expr)
+        while es:
+            expr = es.pop()
+            result = eval_op([result]+expr)
+
+        return result
     
     def stack_history(self):
         for stack in self.stack_hist:
@@ -115,8 +127,8 @@ class Ast:
         return None
     
 # state machine states
-SET_LHS = "SET_LHS"
-ADD_RULE = "ADD_RULE"
+SET_LHS = 'SET_LHS'
+ADD_RULE = 'ADD_RULE'
 
 class StateMachine:
     def __init__(self):
@@ -139,14 +151,14 @@ class StateMachine:
         handles SET_LHS state 
         returns: (state, Rule)
         """
-        if token.type == "BNF_NAME":
+        if token.type == 'BNF_NAME':
             self.rule = Rule(token.value)
             return SET_LHS, None
 
-        elif token.type == "COLON":
+        elif token.type == 'COLON':
             return ADD_RULE, None
         
-        else: # token.type == "COMMENT"
+        else: # token.type == 'COMMENT'
             return SET_LHS, None
         
     def _handle_add_rule(self, token: Token) -> tuple[str, Optional[Rule]]:
@@ -154,20 +166,20 @@ class StateMachine:
         handles ADD_RULE state 
         returns: (state, Rule)
         """
-        if token.type == "BNF_NAME":
+        if token.type == 'BNF_NAME':
             self.rule.add(token.value)
             return ADD_RULE, None
 
-        elif token.type == "TERMINAL":
+        elif token.type == 'TERMINAL':
             self.rule.add(token.value)
             return ADD_RULE, None
 
-        elif token.type == "PIPE":
+        elif token.type == 'PIPE':
             current_rule = self.rule
             self.rule = Rule(self.rule.lhs)
             return ADD_RULE, current_rule
 
-        elif token.type == "SEMICOLON":
+        elif token.type == 'SEMICOLON':
             return SET_LHS, self.rule
         
         else:
