@@ -55,13 +55,6 @@ class Ast:
         # shift
         self.stack.append(token.type)
         
-        # handle initial AstNode and incoming tokens
-        rule = self._matches_rule([self.stack[-1]])
-        if rule:
-            self.ast_stack.append(AstNode(rule).set(token))
-        else:
-            self.ast_stack.append(AstNode(None).set(token))
-
         # reduce
         is_reduced = self._reduce_stack(token)
         while is_reduced:
