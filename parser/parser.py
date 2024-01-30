@@ -44,6 +44,8 @@ class Ast:
         self.root: Optional[AstNode] = None
 
     def traverse(self, ast_node: Optional[AstNode]=None, depth: int=0):
+        if not self.ast_stack:
+            return
         if not ast_node:
             ast_node = self.ast_stack[0]
 

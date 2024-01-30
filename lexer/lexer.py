@@ -100,7 +100,7 @@ class Lexer:
                 token = self.next()
                 if not token:
                     break
-                if token.type not in {"SPACE", "NEWLINE"}:
+                if token.type not in {"SPACE"}:
                     tokens.append(token)
             except Exception as e:
                 tokens.append(Token("ERROR", str(e)))

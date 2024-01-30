@@ -6,12 +6,13 @@ NEWLINE "\n"
 TAB "\t"
 STRING "".*""
 ERROR ""[^"]*"
-VAR_NAME "[a-z]+\w*"
-FUNC_NAME "_?[a-zA-Z]+\w*"
+NAME "[a-z]+\w*"
+USER_TYPE "[A-Z]+\w*"
+ITER_FUNC_NAME "_?[a-z]+\w*"
 
 # data types
 BLANK '_'
-INT "\d+|(-\d+)"
+INT "\d+"
 FLOAT "\d+\.\d*|(-\d+\.\d*)"
 
 # operators
@@ -19,4 +20,4 @@ ADD '+'
 SUBTRACT '-'
 MULTIPLY '*'
 DIVIDE '/'
-ASSIGNMENT ':='
+ASSIGNMENT '->'
