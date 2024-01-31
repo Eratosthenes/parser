@@ -18,7 +18,7 @@ def lexer_repl(lexer: Lexer):
         for token in lexer.set(line).lex():
             print(token)
 
-def repl_bnf(lexer: Lexer, rules: List[Rule]):
+def ast_repl(lexer: Lexer, ast: Ast) -> Ast:
     def help():
         print("Options:")
         opts = list(OPTIONS.keys())
@@ -33,60 +33,66 @@ def repl_bnf(lexer: Lexer, rules: List[Rule]):
     def quit():
         sys.exit(0)
 
-    def tokens():
+    def print_lexer():
         print(lexer)
+
+    def print_tokens():
+        print(ast.tokens)
 
     def print_rules():
         print("Rules:")
-        for rule in rules:
+        for rule in ast.rules:
             print(rule)
+        
+    def print_ast():
+        print("ast:") 
+        ast.print()
+
+    def stack_history():
+        print("stack:")
+        ast.stack_history()
 
     OPTIONS = {
         '\\h': help,
         '\\help': help,
         '\\q': quit,
         '\\quit': quit,
-        '\\t': tokens,
-        '\\tokens': tokens,
+        '\\l': print_lexer,
+        '\\lexer': print_lexer,
+        '\\t': print_tokens,
+        '\\tokens': print_tokens,
         '\\r': print_rules,
         '\\rules': print_rules,
+        '\\a': print_ast,
+        '\\ast': print_ast,
+        '\\hist': stack_history,
+        '\\history': stack_history,
     }
 
     line = input(">").lower().strip()
     if not line:
-        return
-    if line[0] == '\\':
-        if OPTIONS.get(line):
-            return OPTIONS[line]()
-        else:
-            print(f"unrecognized option: '{line}'")
-            return []
-    else:
-        return lexer.set(line).lex()
+        return ast
+    if line[0] != '\\':
+        ast.parse(lexer.set(line).lex())
+        # itr = Interpreter(ast.root)
+        # print("eval stack:")
+        # print(itr.eval_stack())
+        return ast
+
+    if not OPTIONS.get(line):
+        print(f"unrecognized option: '{line}'")
+        return ast
+
+    OPTIONS[line]()
+    return ast
 
 def repl(lexer: Lexer, bnf_tokens: List[Token]):
     """ 
     REPL for programming language
-    inputs: language lexer, tokenized .bnf file """
-
-    rules = RuleSet(bnf_tokens).rules
+    inputs: language lexer, tokenized .bnf file 
+    """
     print("Enter an expression ('\h' for help or '\q' to quit):")
+    rules = RuleSet(bnf_tokens).rules
+    ast = Ast(rules)
     while True:
-        tokens = repl_bnf(lexer, rules)
-        if not tokens:
-            continue
-
-        print("tokens:", tokens)
-
-        ast = Ast(rules)
-        ast.parse(tokens)
-
-        print("stack:")
-        ast.stack_history()
-
-        print("ast:") 
-        ast.print()
-
-        itr = Interpreter(ast.root)
-        print("eval stack:")
-        print(itr.eval_stack())
+        ast = ast_repl(lexer, ast)

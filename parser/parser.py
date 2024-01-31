@@ -43,6 +43,7 @@ class Ast:
         self.stack_hist: List[List[str]] = []
         self.ast_stack: List[AstNode] = []
         self.root: Optional[AstNode] = None
+        self.tokens: List[Token] = []
     
     def stack_history(self):
         for stack in self.stack_hist:
@@ -60,6 +61,7 @@ class Ast:
     
     def parse(self, tokens: List[Token]):
         """ parse a list of tokens """
+        self.tokens = tokens
         for token in tokens:
             self._parse(token)
 
