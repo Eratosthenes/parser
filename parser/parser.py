@@ -82,7 +82,8 @@ class Ast:
         while is_reduced:
             is_reduced = self._reduce_stack(token)
         
-        self.root = self.ast_stack[0]
+        if self.ast_stack:
+            self.root = self.ast_stack[0]
     
     def _reduce_stack(self, token: Token) -> bool:
         for i in range(len(self.stack))[::-1]:
@@ -99,6 +100,7 @@ class Ast:
                 self.ast_stack[i:] = [new_ast]
                 return True
 
+        self.ast_stack.append(AstNode(None).set(token))
         self.stack_hist.append(self.stack.copy())
         return False
     

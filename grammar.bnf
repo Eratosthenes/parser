@@ -15,6 +15,7 @@ term: NAME
     | FLOAT 
     | INT 
     | STRING
+    | OP expr CP
     ;
 
 // operations

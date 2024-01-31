@@ -47,6 +47,7 @@ def make_partial_tokens(tok_rx, fixed_tokens):
         fixed_tokens[partial_tok_rx] = "ERROR", pattern
 
 test_cases = [
+    "(2+3)",
     "4.1*5",
     "1* 5",
     "1+2 - 3.1415/4 * 5",

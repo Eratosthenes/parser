@@ -17,11 +17,12 @@ class Interpreter:
         def _eval(node: AstNode):
             r = []
             for child in node.children:
-                if child.token:
+                if child.rule and child.token:
                     r.append(child.token)
                 else: 
                     _eval(child)
-            eval_stack.append(r)
+            if r:
+                eval_stack.append(r)
 
         eval_stack: List[List[Token]] = []
         _eval(self.root)
