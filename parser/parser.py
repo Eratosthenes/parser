@@ -45,6 +45,18 @@ class Ast:
         self.root: Optional[AstNode] = None
         self.tokens: List[Token] = []
     
+    def prune(self):
+        """ prune the ast of nodes with tokens but no rules """
+        def _prune(node: AstNode):
+            pruned_children: List[AstNode] = []
+            for child in node.children:
+                if child.rule or not child.token:
+                    pruned_children.append(child)
+                    _prune(child)
+            node.children = pruned_children
+
+        _prune(self.root)
+
     def stack_history(self):
         for stack in self.stack_hist:
             print(stack)
@@ -72,6 +84,8 @@ class Ast:
         self.tokens = tokens
         for token in tokens:
             self._parse(token)
+        
+        self.prune()
 
     def _parse(self, token: Token):
         """ LR parse a single token """
