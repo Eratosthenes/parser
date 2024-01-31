@@ -59,6 +59,14 @@ class Ast:
         for child in ast_node.children:
             self.print(child, depth+1)
     
+    def reset(self):
+        """ reset ast state """
+        self.stack = []
+        self.stack_hist = []
+        self.ast_stack = []
+        self.root = None
+        self.tokens = []
+
     def parse(self, tokens: List[Token]):
         """ parse a list of tokens """
         self.tokens = tokens

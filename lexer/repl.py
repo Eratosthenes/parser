@@ -1,7 +1,7 @@
 import sys
-from typing import List
+from typing import List, Tuple, Optional
 from lexer.lexer import Lexer, Token
-from parser.parser import Rule, RuleSet, Ast
+from parser.parser import RuleSet, Ast
 from interpreter.interpreter import Interpreter
 
 def lexer_repl(lexer: Lexer):
@@ -18,7 +18,7 @@ def lexer_repl(lexer: Lexer):
         for token in lexer.set(line).lex():
             print(token)
 
-def ast_repl(lexer: Lexer, ast: Ast) -> Ast:
+def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, Optional[Interpreter]]:
     def help():
         print("Options:")
         opts = list(OPTIONS.keys())
@@ -52,6 +52,10 @@ def ast_repl(lexer: Lexer, ast: Ast) -> Ast:
         print("stack:")
         ast.stack_history()
 
+    def eval_stack():
+        print("eval stack:")
+        print(itr.eval_stack())
+
     OPTIONS = {
         '\\h': help,
         '\\help': help,
@@ -67,24 +71,24 @@ def ast_repl(lexer: Lexer, ast: Ast) -> Ast:
         '\\ast': print_ast,
         '\\hist': stack_history,
         '\\history': stack_history,
+        '\\es': eval_stack,
+        '\\eval_stack': eval_stack,
     }
 
     line = input(">").lower().strip()
     if not line:
-        return ast
+        return ast, itr
     if line[0] != '\\':
+        ast.reset()
         ast.parse(lexer.set(line).lex())
-        # itr = Interpreter(ast.root)
-        # print("eval stack:")
-        # print(itr.eval_stack())
-        return ast
+        return ast, Interpreter(ast.root)
 
     if not OPTIONS.get(line):
         print(f"unrecognized option: '{line}'")
-        return ast
+        return ast, itr
 
     OPTIONS[line]()
-    return ast
+    return ast, itr
 
 def repl(lexer: Lexer, bnf_tokens: List[Token]):
     """ 
@@ -94,5 +98,6 @@ def repl(lexer: Lexer, bnf_tokens: List[Token]):
     print("Enter an expression ('\h' for help or '\q' to quit):")
     rules = RuleSet(bnf_tokens).rules
     ast = Ast(rules)
+    itr = None
     while True:
-        ast = ast_repl(lexer, ast)
+        ast, itr = ast_repl(lexer, ast, itr)
