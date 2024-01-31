@@ -19,12 +19,48 @@ def lexer_repl(lexer: Lexer):
             print(token)
 
 def repl_bnf(lexer: Lexer, rules: List[Rule]):
-    line = input(">")
-    if line.lower() == '\q':
+    def help():
+        print("Options:")
+        opts = list(OPTIONS.keys())
+        pairs = []
+        for i in range(len(opts)):
+            if i%2==0:
+                pairs.append(opts[i:i+2])            
+        for pair in pairs:
+            short, long = pair
+            print(f"{short} {long}")
+
+    def quit():
         sys.exit(0)
-    elif line.lower() == '\h':
+
+    def tokens():
         print(lexer)
-        return []
+
+    def print_rules():
+        print("Rules:")
+        for rule in rules:
+            print(rule)
+
+    OPTIONS = {
+        '\\h': help,
+        '\\help': help,
+        '\\q': quit,
+        '\\quit': quit,
+        '\\t': tokens,
+        '\\tokens': tokens,
+        '\\r': print_rules,
+        '\\rules': print_rules,
+    }
+
+    line = input(">").lower().strip()
+    if not line:
+        return
+    if line[0] == '\\':
+        if OPTIONS.get(line):
+            return OPTIONS[line]()
+        else:
+            print(f"unrecognized option: '{line}'")
+            return []
     else:
         return lexer.set(line).lex()
 
@@ -32,16 +68,14 @@ def repl(lexer: Lexer, bnf_tokens: List[Token]):
     """ 
     REPL for programming language
     inputs: language lexer, tokenized .bnf file """
-    print(lexer)
 
     rules = RuleSet(bnf_tokens).rules
-    print("Rules:")
-    for rule in rules:
-        print(rule)
-
-    print("Enter an expression ('\q' to quit):")
+    print("Enter an expression ('\h' for help or '\q' to quit):")
     while True:
         tokens = repl_bnf(lexer, rules)
+        if not tokens:
+            continue
+
         print("tokens:", tokens)
 
         ast = Ast(rules)

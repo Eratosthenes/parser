@@ -17,6 +17,10 @@ BLANK '_'
 INT "\d+"
 FLOAT "\d+\.\d*|(-\d+\.\d*)"
 
+# control structures
+OP '('
+CP ')'
+
 # operators
 ADD '+'
 SUBTRACT '-'

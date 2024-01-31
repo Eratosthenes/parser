@@ -29,7 +29,7 @@ class Lexer:
         for key, value in self.variable_tokens.items():
             s += f"\"{key.pattern}\": {value}\n"
         
-        return s
+        return s[:-1]
 
     def _flush(self):
         self.buf = []
