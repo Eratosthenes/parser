@@ -84,6 +84,8 @@ class Ast:
         
         if self.ast_stack:
             self.root = self.ast_stack[0]
+        else:
+            raise Exception("ast has no root")
     
     def _reduce_stack(self, token: Token) -> bool:
         for i in range(len(self.stack))[::-1]:
@@ -92,12 +94,12 @@ class Ast:
                 self.stack_hist.append(self.stack.copy())
                 self.stack[i:] = [rule.lhs] # reduce stack
                 # reduce ast: rule, token, children
-                new_ast = AstNode(rule)
+                new_node = AstNode(rule)
                 if rule.is_literal():
-                    new_ast.set(token)
+                    new_node.set(token)
 
-                new_ast.children = self.ast_stack[i:]
-                self.ast_stack[i:] = [new_ast]
+                new_node.children = self.ast_stack[i:]
+                self.ast_stack[i:] = [new_node]
                 return True
 
         self.ast_stack.append(AstNode(None).set(token))
