@@ -101,3 +101,4 @@ def repl(lexer: Lexer, bnf_tokens: List[Token]):
     itr = None
     while True:
         ast, itr = ast_repl(lexer, ast, itr)
+        print(f"-> {itr.eval()}")
