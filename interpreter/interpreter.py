@@ -73,6 +73,8 @@ class Interpreter:
                 op_type = OPERANDS[op1.type]
                 value = op(*[op_type(tok.value) for tok in operands])
                 return Token(op1.type, value)
+            elif len(operands) == 1:
+                return operands[0]
 
         try:
             return _eval(self.root).value

@@ -81,7 +81,9 @@ def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, O
     if line[0] != '\\':
         ast.reset()
         ast.parse(lexer.set(line).lex())
-        return ast, Interpreter(ast.root)
+        itr = Interpreter(ast.root)
+        print(f"-> {itr.eval()}")
+        return ast, itr
 
     if not OPTIONS.get(line):
         print(f"unrecognized option: '{line}'")
@@ -101,4 +103,3 @@ def repl(lexer: Lexer, bnf_tokens: List[Token]):
     itr = None
     while True:
         ast, itr = ast_repl(lexer, ast, itr)
-        print(f"-> {itr.eval()}")
