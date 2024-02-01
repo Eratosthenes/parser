@@ -14,19 +14,16 @@ class Interpreter:
 
     def eval_stack(self) -> List[List[Token]]:
         """ create an evaluation stack """
-        def _eval(node: AstNode):
+        def _eval(node: AstNode) -> List[AstNode]:
             r = []
             for child in node.children:
-                if child.rule and child.token:
+                if child.token:
                     r.append(child.token)
                 else: 
-                    _eval(child)
-            if r:
-                eval_stack.append(r)
+                    r.append(_eval(child))
+            return r
 
-        eval_stack: List[List[Token]] = []
-        _eval(self.root)
-        return eval_stack
+        return _eval(self.root)
 
     def eval(self):
         """ evaluate an expression """
