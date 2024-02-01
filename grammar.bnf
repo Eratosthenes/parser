@@ -16,6 +16,7 @@ term: NAME
     | INT 
     | STR
     | OP expr CP
+    | OP term CP
     ;
 
 // operations

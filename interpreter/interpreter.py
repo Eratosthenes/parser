@@ -71,7 +71,7 @@ class Interpreter:
                     raise Exception(f"type error: {s1} does not match {s2}")
 
                 op_type = OPERANDS[op1.type]
-                value = op(*[op_type(tok.value) for tok in operands])
+                value = op_type(op(*[op_type(tok.value) for tok in operands]))
                 return Token(op1.type, value)
             elif len(operands) == 1:
                 return operands[0]
