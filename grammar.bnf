@@ -14,7 +14,7 @@ expr: expr op term
 term: NAME 
     | FLOAT 
     | INT 
-    | STRING
+    | STR
     | OP expr CP
     ;
 

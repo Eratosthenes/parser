@@ -4,7 +4,7 @@
 SPACE ' '
 NEWLINE "\n"
 TAB "\t"
-STRING "".*""
+STR "".*""
 ERROR ""[^"]*"
 
 # names

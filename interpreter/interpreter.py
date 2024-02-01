@@ -15,10 +15,11 @@ def op_multiply(x, y):
     return x*y
 
 OPERANDS = {
-    'NAME': str, 
-    'ITER_FUNC_NAME': str, 
+    'NAME': any, 
+    'ITER_FUNC_NAME': any, 
     'INT': int, 
     'FLOAT': float,
+    'STR': str,
 }
 
 OP_TABLE = {
@@ -44,41 +45,36 @@ class Interpreter:
             return r
 
         return _eval(self.root)
-
-    # TODO: handle typing and assignments
-    # TODO: attempt to redo tihs function with simpler logic
+    
     def eval(self):
-        """ evaluate an expression """
         def _eval(node: AstNode) -> Token:
             if node.token:
-                token = node.token
-                return OPERANDS[token.type](token.value)
-
-            operands: any = []
+                return node.token
+            
+            operands: List[Token] = []
             for child in node.children:
                 if not child.token:
                     operands.append(_eval(child))
                     continue
 
                 token = child.token
-                if token.type in OPERANDS.keys():
-                    op_type = OPERANDS[token.type]
-                    operands.append(op_type(token.value))
-                elif token.type in OP_TABLE.keys():
-                    op_func = OP_TABLE[token.type]
+                if OPERANDS.get(token.type):
+                    operands.append(token)
                 else:
-                    operands.append(_eval(child))
+                    op = OP_TABLE[token.type]
 
             if len(operands) == 2:
                 op1, op2 = operands
-                t1, t2 = list(map(type, operands))
-                if t1 != t2:
-                    raise Exception(f"type error: {op1} ({t1}) does not match {op2} ({t2})")
-                return op_func(*operands)
-            elif len(operands) == 1:
-                return operands[0]
+                if op1.type != op2.type:
+                    s1 = f"{op1.value} (type {op1.type.lower()})"
+                    s2 = f"{op2.value} (type {op2.type.lower()})"
+                    raise Exception(f"type error: {s1} does not match {s2}")
+
+                op_type = OPERANDS[op1.type]
+                value = op(*[op_type(tok.value) for tok in operands])
+                return Token(op1.type, value)
 
         try:
-            return _eval(self.root)
+            return _eval(self.root).value
         except Exception as e:
             return str(e)
