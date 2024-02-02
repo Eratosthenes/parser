@@ -14,6 +14,11 @@ def op_divide(x, y):
 def op_multiply(x, y):
     return x*y
 
+def op_assignment(x, y):
+    """ assign x -> y """
+    return x
+
+
 OPERANDS = {
     'NAME': any, 
     'ITER_FUNC_NAME': any, 
@@ -23,6 +28,7 @@ OPERANDS = {
 }
 
 OP_TABLE = {
+    'ASSIGNMENT': op_assignment,
     'ADD': op_add,
     'SUBTRACT': op_subtract,
     'DIVIDE': op_divide,
@@ -79,4 +85,4 @@ class Interpreter:
         try:
             return _eval(self.root).value
         except Exception as e:
-            return str(e)
+            return e.__repr__()
