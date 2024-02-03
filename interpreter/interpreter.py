@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Callable
 from lexer.lexer import Token
 from parser.parser import AstNode
 
@@ -28,7 +28,7 @@ TYPES = {
 }
 
 class Operation:
-    FUNCS = {
+    FUNCS: Dict[str, Callable] = {
         'ASSIGNMENT': op_assignment,
         'ADD': op_add,
         'SUBTRACT': op_subtract,
@@ -38,7 +38,7 @@ class Operation:
 
     def __init__(self, token: Token):
         self.operation = token.type # eg ADD, ASSIGNMENT etc
-        self.func = self.FUNCS.get(token.type)
+        self.func: Callable = self.FUNCS[token.type]
     
     def eval(self, env: Dict[Token, Token], operands: List[Token]):
         if self.operation == 'ASSIGNMENT':
@@ -76,7 +76,7 @@ class Operation:
 class Interpreter:
     def __init__(self, root: AstNode):
         self.root = root
-        self.env: Dict[str, Token] = {}
+        self.env: Dict[Token, Token] = {}
     
     def set(self, root: AstNode):
         self.root = root
