@@ -68,7 +68,9 @@ def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, O
     if line[0] != '\\':
         ast.reset()
         ast.parse(lexer.set(line).emit())
-        if len(ast.stack) > 1:
+        if ast.stack and ast.stack[-1]=='ERROR':
+            print("syntax error: check \\tokens")
+        elif len(ast.stack) > 1:
             print("parse error: check \stack")
         else:
             itr.set(ast.root)
