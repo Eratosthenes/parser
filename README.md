@@ -1,5 +1,5 @@
 # LR Parser
----
+
 ## About:
 The "[dragon book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)" on compilers has this to say about LR parsers:
 
