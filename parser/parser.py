@@ -42,7 +42,7 @@ class Ast:
         self.stack: List[str] = []
         self.stack_hist: List[List[str]] = []
         self.ast_stack: List[AstNode] = []
-        self.root: Optional[AstNode] = None
+        self.root: AstNode = AstNode(None)
         self.tokens: List[Token] = []
     
     def prune(self):

@@ -1,10 +1,10 @@
 import sys
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from lexer.lexer import Lexer, Token
 from parser.parser import RuleSet, Ast
 from interpreter.interpreter import Interpreter
 
-def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, Optional[Interpreter]]:
+def ast_repl(lexer: Lexer, ast: Ast, itr: Interpreter) -> Tuple[Ast, Interpreter]:
     def help():
         print("Options:")
         opts = list(OPTIONS.keys())
