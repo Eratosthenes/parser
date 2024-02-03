@@ -11,8 +11,6 @@ This repository consists of an LR parser written in ~600 lines of Python, withou
 
 Along with the parser, a lexer and an interpreter for a very basic programming language (which supports arithmetic expressions and assignments to variables) is included. Hopefully this dispels the myth that LR parsers cannot be handwritten.
 
-This lexer-parser-interpreter is for learning purposes; please don't submit any PR's without first creating an issue ticket.
-
 Does it really work? Fire up the interpreter and see for yourself.
 
 ## Running:
@@ -238,3 +236,11 @@ type error: 1 (type int) does not match 2.0 (type float)
 -> 3.0
 ```
 Note that ints are not automatically promoted to floats; consistent typing is enforced.
+
+## Usage
+
+This lexer-parser-interpreter is for learning purposes. Feel free to use it, just keep in mind it comes with no warranty whatsoever (whatever that means).
+
+## Contributing
+
+This project is purposely limited in scope. If you find any bugs, please feel free to file a ticket. However, please don't submit any PR's without first creating a ticket outlining the problem and your proposed solution.
