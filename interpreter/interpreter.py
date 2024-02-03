@@ -14,8 +14,7 @@ def op_divide(x, y):
 def op_multiply(x, y):
     return x*y
 
-# TODO: modify the __eq__ function store tokens in env
-def op_assignment(env: dict, x: Token, y: str):
+def op_assignment(env: dict, x: Token, y: Token):
     """ assign x -> y """
     env[y] = x
     return x
@@ -41,17 +40,18 @@ class Operation:
         self.operation = token.type # eg ADD, ASSIGNMENT etc
         self.func = self.FUNCS.get(token.type)
     
-    def eval(self, env: Dict[str, Token], operands: List[Token]):
-        operands = self._resolve(env, operands)
+    def eval(self, env: Dict[Token, Token], operands: List[Token]):
         if self.operation == 'ASSIGNMENT':
+            operands[:1] = self._resolve(env, operands[:1])
             return self._assign(env, *operands)
 
+        operands = self._resolve(env, operands)
         return self._apply(*operands)
     
-    def _resolve(self, env: Dict[str, Token], operands: List[Token]) -> List[Token]:
+    def _resolve(self, env: Dict[Token, Token], operands: List[Token]) -> List[Token]:
         """ resolve any operands from environment """
         for i in range(len(operands)):
-            token = env.get(operands[i].value)
+            token = env.get(operands[i])
             if token:
                 operands[i] = token
 
@@ -69,9 +69,9 @@ class Operation:
         values = [op_type(tok.value) for tok in [op1, op2]]
         return Token(op1.type, op_type(self.func(*values)))
 
-    def _assign(self, env: Dict[str, Token], expr: Token, name: Token) -> Token:
+    def _assign(self, env: Dict[Token, Token], expr: Token, name: Token) -> Token:
         """ assign an expression to a value """
-        return self.func(env, expr, name.value)
+        return self.func(env, expr, name)
 
 class Interpreter:
     def __init__(self, root: AstNode):
@@ -84,7 +84,7 @@ class Interpreter:
     def eval(self):
         def _eval(node: AstNode) -> Token:
             if node.token:
-                env_tok = self.env.get(node.token.value)
+                env_tok = self.env.get(node.token)
                 if env_tok:
                     return env_tok
                 return node.token

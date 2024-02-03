@@ -7,6 +7,14 @@ class Token:
     
     def __repr__(self):
         return f"<{self.type}: {repr(self.value)}>"
+    
+    def __eq__(self, token) -> bool:
+        return isinstance(token, Token) and \
+            self.type == token.type and \
+            self.value == token.value
+    
+    def __hash__(self):
+        return hash((self.type, self.value))
 
 class TokenTable:
     def __init__(self, fixed_tokens, variable_tokens):

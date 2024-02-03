@@ -1,6 +1,8 @@
 // bnf grammar for language
 // NOTE: uppercase words match to tokens
-statement: expr assignment term; 
+statement: expr assignment term
+        | term assignment term
+        ; 
 
 // assignment
 assignment: ASSIGNMENT;
