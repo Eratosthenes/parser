@@ -4,6 +4,7 @@ from lexer.lexer import Lexer, Token
 from parser.parser import RuleSet, Ast
 from interpreter.interpreter import Interpreter
 
+# TODO: get rid of this function
 def lexer_repl(lexer: Lexer):
     """ prints tokenized input """
     print("Enter an expression ('\q' to quit):")
@@ -15,7 +16,7 @@ def lexer_repl(lexer: Lexer):
             print(lexer)
             continue
 
-        for token in lexer.set(line).lex():
+        for token in lexer.set(line).emit():
             print(token)
 
 def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, Optional[Interpreter]]:
@@ -51,10 +52,10 @@ def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, O
     def stack_history():
         print("stack:")
         ast.stack_history()
-
-    def eval_stack():
-        print("eval stack:")
-        print(itr.eval_stack())
+    
+    def print_env():
+        print("env:")
+        print(itr.env)
 
     OPTIONS = {
         '\\h': help,
@@ -69,10 +70,10 @@ def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, O
         '\\rules': print_rules,
         '\\a': print_ast,
         '\\ast': print_ast,
+        '\\e': print_env,
+        '\\env': print_env,
         '\\hist': stack_history,
         '\\history': stack_history,
-        '\\es': eval_stack,
-        '\\eval_stack': eval_stack,
     }
 
     line = input(">").lower().strip()
@@ -80,8 +81,8 @@ def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, O
         return ast, itr
     if line[0] != '\\':
         ast.reset()
-        ast.parse(lexer.set(line).lex())
-        itr = Interpreter(ast.root)
+        ast.parse(lexer.set(line).emit())
+        itr.set(ast.root)
         print(f"-> {itr.eval()}")
         return ast, itr
 
@@ -100,6 +101,6 @@ def repl(lexer: Lexer, bnf_tokens: List[Token]):
     print("Enter an expression ('\h' for help or '\q' to quit):")
     rules = RuleSet(bnf_tokens).rules
     ast = Ast(rules)
-    itr = None
+    itr = Interpreter(ast.root)
     while True:
         ast, itr = ast_repl(lexer, ast, itr)

@@ -84,14 +84,14 @@ def main():
     if "test" in args: 
         lexer = Lexer(read_tokfile('language.tok'))
         for case in test_cases:
-            print(lexer.set(case).lex())
+            print(lexer.set(case).emit())
 
     # main.py -tokens=bnf.tok -input=grammar.bnf
     elif "input" in args:
         arg_d = make_dict(args)
         lexer = Lexer(read_tokfile(arg_d["tokens"]))
         text = open(arg_d["input"]).read()
-        tokens = lexer.set(text).lex()
+        tokens = lexer.set(text).emit()
         for token in tokens:
             print(token)
         
@@ -103,7 +103,7 @@ def main():
         bnf_lexer = Lexer(read_tokfile('bnf.tok'))
 
         grammar_bnf = open(arg_d["lang"]).read()
-        grammar_tokens = bnf_lexer.set(grammar_bnf).lex() 
+        grammar_tokens = bnf_lexer.set(grammar_bnf).emit() 
 
         repl(lang_lexer, grammar_tokens)
 

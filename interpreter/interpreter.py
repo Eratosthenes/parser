@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from lexer.lexer import Token
 from parser.parser import AstNode
 
@@ -14,7 +14,8 @@ def op_divide(x, y):
 def op_multiply(x, y):
     return x*y
 
-def op_assignment(env: dict, x: any, y: any):
+# TODO: modify the __eq__ function store tokens in env
+def op_assignment(env: dict, x: Token, y: str):
     """ assign x -> y """
     env[y] = x
     return x
@@ -37,48 +38,55 @@ class Operation:
     }
 
     def __init__(self, token: Token):
-        self.name = token.type # e.g. ADD, SUBTRACT, ASSIGNMENT etc
+        self.operation = token.type # eg ADD, ASSIGNMENT etc
         self.func = self.FUNCS.get(token.type)
+    
+    def eval(self, env: Dict[str, Token], operands: List[Token]):
+        operands = self._resolve(env, operands)
+        if self.operation == 'ASSIGNMENT':
+            return self._assign(env, *operands)
+
+        return self._apply(*operands)
+    
+    def _resolve(self, env: Dict[str, Token], operands: List[Token]) -> List[Token]:
+        """ resolve any operands from environment """
+        for i in range(len(operands)):
+            token = env.get(operands[i].value)
+            if token:
+                operands[i] = token
+
+        return operands
+
+    def _apply(self, op1: Token, op2: Token) -> Token:
+        """ apply an operation to a list of operands """
+        # type checking
+        if op1.type != op2.type:
+            s1 = f"{op1.value} (type {op1.type.lower()})"
+            s2 = f"{op2.value} (type {op2.type.lower()})"
+            raise Exception(f"type error: {s1} does not match {s2}")
+
+        op_type = TYPES[op1.type] # eg str, int, float
+        values = [op_type(tok.value) for tok in [op1, op2]]
+        return Token(op1.type, op_type(self.func(*values)))
+
+    def _assign(self, env: Dict[str, Token], expr: Token, name: Token) -> Token:
+        """ assign an expression to a value """
+        return self.func(env, expr, name.value)
 
 class Interpreter:
     def __init__(self, root: AstNode):
         self.root = root
-        self.env = {}
-
-    def eval_stack(self) -> List[List[Token]]:
-        """ create an evaluation stack """
-        def _eval(node: AstNode) -> List[AstNode]:
-            r = []
-            for child in node.children:
-                if child.token:
-                    r.append(child.token)
-                else: 
-                    r.append(_eval(child))
-            return r
-
-        return _eval(self.root)
+        self.env: Dict[str, Token] = {}
     
+    def set(self, root: AstNode):
+        self.root = root
+
     def eval(self):
-        def apply(op: Operation, operands: List[Token]) -> Token:
-            op1, op2 = operands
-            if op1.type != op2.type:
-                s1 = f"{op1.value} (type {op1.type.lower()})"
-                s2 = f"{op2.value} (type {op2.type.lower()})"
-                raise Exception(f"type error: {s1} does not match {s2}")
-
-            op_type = TYPES[op1.type]
-            values = [op_type(tok.value) for tok in operands]
-            return Token(op1.type, op_type(op.func(*values)))
-
-        def assign(op: Operation, expr_tok: Token, name_tok: Token):
-            op_type = TYPES[expr_tok.type]
-            expr = op_type(expr_tok.value)
-            name = TYPES[name_tok.type](name_tok.value)
-            value = op_type(op.func(self.env, expr, name))
-            return Token(expr_tok.type, value)
-
         def _eval(node: AstNode) -> Token:
             if node.token:
+                env_tok = self.env.get(node.token.value)
+                if env_tok:
+                    return env_tok
                 return node.token
             
             operands: List[Token] = []
@@ -87,40 +95,17 @@ class Interpreter:
                     operands.append(_eval(child))
                     continue
 
-                token = child.token
-                if TYPES.get(token.type):
-                    operands.append(token)
+                env_tok = child.token
+                if TYPES.get(env_tok.type):
+                    operands.append(env_tok)
                 else:
-                    op = Operation(token)
+                    op = Operation(env_tok)
 
             if len(operands) == 0:
                 raise Exception("no operands")
-
-            if len(operands) == 1:
+            elif len(operands) == 1:
                 return operands[0]
+            else:
+                return op.eval(self.env, operands)
 
-            # TODO: refactor assign and apply to be part of Operation
-            # len(operands) == 2
-            # case assignment
-            if op.name == 'ASSIGNMENT':
-                tok = assign(op, *operands)
-                return tok
-
-            # case non-assignment
-            return apply(op, operands)
-
-        try:
-            result = _eval(self.root).value
-            print(self.env)
-            return result
-        except Exception as e:
-            return e.with_traceback().__repr__()
-
-"""
-(Pdb) p operands
-[<INT: 3>, <NAME: 'a'>]
-(Pdb) p op.name
-'ASSIGNMENT'
-(Pdb) p op.func
-<function op_assignment at 0x7f3cb5c3da80>
-"""
+        return _eval(self.root).value

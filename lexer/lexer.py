@@ -1,5 +1,7 @@
+from typing import List, Any, Optional
+
 class Token:
-    def __init__(self, type: str, value: str):
+    def __init__(self, type: str, value: Any):
         self.type = type
         self.value = value
     
@@ -12,10 +14,10 @@ class TokenTable:
         self.variable_tokens = variable_tokens
 
 class Lexer:
-    def __init__(self, token_table):
+    def __init__(self, token_table: TokenTable):
         self.i = 0
         self.j = -1 # peek index
-        self.buf = []
+        self.buf: List[str] = []
         self.fixed_tokens = token_table.fixed_tokens
         self.variable_tokens = token_table.variable_tokens
 
@@ -65,9 +67,9 @@ class Lexer:
         self._flush()
         return self
 
-    def next(self):
+    def next(self) -> Optional[Token]:
         if not self._peek():
-            return
+            return None
 
         prev_pattern, found = self._is_match()
         if not found:
@@ -92,7 +94,7 @@ class Lexer:
         self._flush()
         return Token(token_type, token_value)
 
-    def lex(self):
+    def emit(self) -> List[Token]:
         """ return tokens """
         tokens = []
         while True:

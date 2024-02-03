@@ -196,7 +196,7 @@ class StateMachine:
 
 class RuleSet:
     def __init__(self, bnf_tokens: List[Token]):
-        self.rules: List[Token] = []
+        self.rules: List[Rule] = []
         sm = StateMachine()
         for token in bnf_tokens:
             rule = sm.next(token)
