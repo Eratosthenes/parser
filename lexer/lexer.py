@@ -1,25 +1,5 @@
-from typing import List, Any, Optional
-
-class Token:
-    def __init__(self, type: str, value: Any):
-        self.type = type
-        self.value = value
-    
-    def __repr__(self):
-        return f"<{self.type}: {repr(self.value)}>"
-    
-    def __eq__(self, token) -> bool:
-        return isinstance(token, Token) and \
-            self.type == token.type and \
-            self.value == token.value
-    
-    def __hash__(self):
-        return hash((self.type, self.value))
-
-class TokenTable:
-    def __init__(self, fixed_tokens, variable_tokens):
-        self.fixed_tokens = fixed_tokens
-        self.variable_tokens = variable_tokens
+from typing import List, Optional
+from lexer.tokens import Token, TokenTable
 
 class Lexer:
     def __init__(self, token_table: TokenTable):

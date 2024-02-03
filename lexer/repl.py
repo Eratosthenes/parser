@@ -4,21 +4,6 @@ from lexer.lexer import Lexer, Token
 from parser.parser import RuleSet, Ast
 from interpreter.interpreter import Interpreter
 
-# TODO: get rid of this function
-def lexer_repl(lexer: Lexer):
-    """ prints tokenized input """
-    print("Enter an expression ('\q' to quit):")
-    while True:
-        line = input(">")
-        if line.lower() == '\q':
-            break
-        if line.lower() == '\h':
-            print(lexer)
-            continue
-
-        for token in lexer.set(line).emit():
-            print(token)
-
 def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, Optional[Interpreter]]:
     def help():
         print("Options:")
