@@ -95,11 +95,11 @@ class Interpreter:
                     operands.append(_eval(child))
                     continue
 
-                env_tok = child.token
-                if TYPES.get(env_tok.type):
-                    operands.append(env_tok)
+                tok = child.token
+                if TYPES.get(tok.type):
+                    operands.append(tok)
                 else:
-                    op = Operation(env_tok)
+                    op = Operation(tok)
 
             if len(operands) == 0:
                 raise Exception("no operands")

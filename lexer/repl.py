@@ -63,12 +63,16 @@ def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, O
 
     line = input(">").lower().strip()
     if not line:
+        ast.reset()
         return ast, itr
     if line[0] != '\\':
         ast.reset()
         ast.parse(lexer.set(line).emit())
-        itr.set(ast.root)
-        print(itr.eval())
+        if len(ast.stack) > 1:
+            print("parse error: check \stack")
+        else:
+            itr.set(ast.root)
+            print(itr.eval())
         return ast, itr
 
     if not OPTIONS.get(line):
