@@ -49,9 +49,9 @@ def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, O
         print("ast:") 
         ast.print()
 
-    def stack_history():
+    def print_stack():
         print("stack:")
-        ast.stack_history()
+        ast.print_stack()
     
     def print_env():
         print("env:")
@@ -72,8 +72,8 @@ def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, O
         '\\ast': print_ast,
         '\\e': print_env,
         '\\env': print_env,
-        '\\hist': stack_history,
-        '\\history': stack_history,
+        '\\s': print_stack,
+        '\\stack': print_stack,
     }
 
     line = input(">").lower().strip()

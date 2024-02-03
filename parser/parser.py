@@ -57,7 +57,7 @@ class Ast:
 
         _prune(self.root)
 
-    def stack_history(self):
+    def print_stack(self):
         for stack in self.stack_hist:
             print(stack)
 

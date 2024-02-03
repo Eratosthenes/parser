@@ -18,8 +18,8 @@ INT "\d+"
 FLOAT "\d+\.\d*|(-\d+\.\d*)"
 
 # control structures
-OP '('
-CP ')'
+OP '(' # open parentheses
+CP ')' # close parentheses
 
 # operators
 ADD '+'
