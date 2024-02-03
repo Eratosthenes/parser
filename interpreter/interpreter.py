@@ -2,20 +2,35 @@ from typing import List, Dict, Callable
 from lexer.lexer import Token
 from parser.parser import AstNode
 
-def op_add(x, y):
-    return x+y
+def err_msg(t: Token) -> str:
+    return f"{t.value} (type {t.type.lower()})"
 
-def op_subtract(x, y):
-    return x-y
+def op_add(x: Token, y: Token):
+    def is_valid(t) -> bool:
+        return t == 'INT' or t == 'FLOAT'
 
-def op_divide(x, y):
-    return x/y
+    for tok in [x, y]:
+        if not is_valid(tok.type):
+            raise Exception(f"operand error: {err_msg(tok)} cannot be added")
+    return x.value + y.value
 
-def op_multiply(x, y):
-    return x*y
+def op_subtract(x: Token, y: Token):
+    return x.value - y.value
+
+def op_divide(x: Token, y: Token):
+    return x.value / y.value
+
+def op_multiply(x: Token, y: Token):
+    return x.value * y.value
 
 def op_assignment(env: dict, x: Token, y: Token):
     """ assign x -> y """
+    def is_valid(t) -> bool:
+        return t == 'NAME' or t == 'ITER_FUNC_NAME'
+
+    if not is_valid(y.type):
+        raise Exception(f"operand error: {err_msg(y)} cannot be assigned")
+
     env[y] = x
     return x
 
@@ -46,7 +61,7 @@ class Operation:
             return self._assign(env, *operands)
 
         operands = self._resolve(env, operands)
-        return self._apply(*operands)
+        return self._apply(operands)
     
     def _resolve(self, env: Dict[Token, Token], operands: List[Token]) -> List[Token]:
         """ resolve any operands from environment """
@@ -57,17 +72,19 @@ class Operation:
 
         return operands
 
-    def _apply(self, op1: Token, op2: Token) -> Token:
+    def _apply(self, operands: List[Token]) -> Token:
         """ apply an operation to a list of operands """
         # type checking
+        op1, op2 = operands
         if op1.type != op2.type:
-            s1 = f"{op1.value} (type {op1.type.lower()})"
-            s2 = f"{op2.value} (type {op2.type.lower()})"
-            raise Exception(f"type error: {s1} does not match {s2}")
+            raise Exception(f"type error: {err_msg(op1)} does not match {err_msg(op2)}")
 
+        # cast values to types
         op_type = TYPES[op1.type] # eg str, int, float
-        values = [op_type(tok.value) for tok in [op1, op2]]
-        return Token(op1.type, op_type(self.func(*values)))
+        for i in range(len(operands)):
+            operands[i].value = op_type(operands[i].value)
+
+        return Token(op1.type, op_type(self.func(*operands)))
 
     def _assign(self, env: Dict[Token, Token], expr: Token, name: Token) -> Token:
         """ assign an expression to a value """
