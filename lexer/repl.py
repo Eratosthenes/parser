@@ -68,7 +68,7 @@ def ast_repl(lexer: Lexer, ast: Ast, itr: Optional[Interpreter]) -> Tuple[Ast, O
         ast.reset()
         ast.parse(lexer.set(line).emit())
         itr.set(ast.root)
-        print(f"-> {itr.eval()}")
+        print(itr.eval())
         return ast, itr
 
     if not OPTIONS.get(line):

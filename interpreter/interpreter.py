@@ -81,7 +81,7 @@ class Interpreter:
     def set(self, root: AstNode):
         self.root = root
 
-    def eval(self):
+    def eval(self) -> str:
         def _eval(node: AstNode) -> Token:
             if node.token:
                 env_tok = self.env.get(node.token)
@@ -108,4 +108,8 @@ class Interpreter:
             else:
                 return op.eval(self.env, operands)
 
-        return _eval(self.root).value
+        try:
+            value = _eval(self.root).value
+            return f"-> {value}"
+        except Exception as e:
+            return f"{e}"
