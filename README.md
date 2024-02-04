@@ -5,7 +5,7 @@ The "[dragon book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniqu
 
 ![dragon book](bold_claim.png)
 
-True to its reputation, the book is blowing smoke.
+True to its name, this book is blowing smoke.
 
 This repository consists of an LR parser written in ~600 lines of Python, without using any code generation techniques or importing any libraries (except `re` from the standard library for regular expressions, which are used by the lexer, and `sys`, which is used by the REPL to exit).
 
