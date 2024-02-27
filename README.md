@@ -1,17 +1,9 @@
 # LR Parser
 
 ## About:
-The "[dragon book](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools)" on compilers has this to say about LR parsers:
+This repository consists of an LR(0) parser written in ~600 lines of Python, without using any code generation techniques or importing any libraries (except `re` from the standard library for regular expressions, which are used by the lexer, and `sys`, which is used by the REPL to exit).
 
-![dragon book](bold_claim.png)
-
-True to its name, this book is blowing smoke.
-
-This repository consists of an LR parser written in ~600 lines of Python, without using any code generation techniques or importing any libraries (except `re` from the standard library for regular expressions, which are used by the lexer, and `sys`, which is used by the REPL to exit).
-
-Along with the parser, a lexer and an interpreter for a very basic programming language (which supports arithmetic expressions and assignments to variables) is included. Hopefully this dispels the myth that LR parsers cannot be handwritten.
-
-Does it really work? Fire up the interpreter and see for yourself.
+Along with the parser, a lexer and an interpreter for a very basic programming language (which supports arithmetic expressions and assignments to variables) is included.
 
 ## Running:
 
@@ -237,9 +229,9 @@ type error: 1 (type int) does not match 2.0 (type float)
 ```
 Note that ints are not automatically promoted to floats; consistent typing is enforced.
 
-## Usage
+## Disclaimer
 
-This lexer-parser-interpreter is for learning purposes. Feel free to use it, just keep in mind it comes with no warranty whatsoever (whatever that means).
+This lexer-parser-interpreter is for learning purposes. Feel free to use it, just keep in mind it comes with no warranty whatsoever.
 
 ## Contributing
 

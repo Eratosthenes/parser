@@ -22,7 +22,7 @@ term: NAME
     ;
 
 // operations
-op:   ADD 
+op: ADD 
     | SUBTRACT
     | MULTIPLY
     | DIVIDE
